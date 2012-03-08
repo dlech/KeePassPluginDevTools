@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("KeePassPluginTestUtil")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Helper library for unit testing KeePass 2.x plugins")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("dlech")]
 [assembly: AssemblyProduct("KeePassPluginTestUtil")]
 [assembly: AssemblyCopyright("Copyright ©  2012")]
 [assembly: AssemblyTrademark("")]

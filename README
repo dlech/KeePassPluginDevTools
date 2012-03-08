@@ -1,0 +1,40 @@
+This is a tool for developers of plugins for KeePass 2.x. It allows the 
+developer to start and stop and otherwise interact with KeePass from the unit 
+test environment. 
+
+Usage:
+
+1. Create a new unit test class
+2. In the class initalization method, do something like:
+
+    ClassInitialize()]
+		public static void MyClassInitialize(TestContext testContext)
+		{
+			IPluginHost host = KeePassControl.StartKeePass();
+			Assert.IsNotNull(host, "Could not connect to KeePass");
+			plugin = new KeePassHttp.KeePassHttpExt();
+			plugin.Initialize(host);
+		}
+    
+3. In the class cleanup method do someting like:
+
+    [ClassCleanup()]
+		public static void MyClassCleanup()
+		{
+			plugin.Terminate();
+			KeePassControl.ExitAll();
+		}
+    
+    
+How it works:
+
+The KeePassControl.StartKeePass() method makes sure any running instance of 
+KeePass is closed. Then it copies a basic config file and database file to 
+the directory where the KeePass.exe file is. You will want to make sure you 
+have set the Copy Local property to true in your references so that you do 
+not write over your actual config file. If all systems are go, it will then 
+start a new instance of KeePass which can be accessed from the unit test. When
+the testing is done, the KeePassControl.ExitAll() method will close the test
+instance of KeePass.
+
+Enjoy!

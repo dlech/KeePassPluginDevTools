@@ -5,6 +5,7 @@ using System.Threading;
 using System.Windows.Forms;
 using KeePass.Plugins;
 using System.Reflection;
+using KeePass.Forms;
 
 namespace KeePassPluginTestUtil
 {
@@ -53,20 +54,33 @@ namespace KeePassPluginTestUtil
 		}
 
 		/// <summary>
-		/// Starts KeePass with config and database files from Resources directory.
+		/// Stops all running instances of KeePass, then starts a new instance of KeePass 
+		/// with a barebones database and (mostly) default configuration.
 		/// </summary>
 		/// <returns>IPluginHost object from KeePass</returns>
 		public static IPluginHost StartKeePass()
 		{
-			return StartKeePass(defaultTimeout);
+			return StartKeePass(true);
 		}
 
 		/// <summary>
-		/// Starts KeePass with config and database files from Resources directory
+		/// Starts a new instance of KeePass with a barebones database and (mostly) default configuration.
 		/// </summary>
-		/// <param name="timeout">time to wait for KeePass to start before showing error message</param>
+		/// <param name="exitAllFirst">If set to true, the ExitAll() method will be called first to close any running instances of KeePass</param>
 		/// <returns>IPluginHost object from KeePass</returns>
-		public static IPluginHost StartKeePass(double timeout)
+		public static IPluginHost StartKeePass(bool exitAllFirst)
+		{
+			return StartKeePass(exitAllFirst, defaultTimeout);
+		}
+
+		/// <summary>
+		/// Starts a new instance of KeePass with a barebones database and (mostly) default configuration.
+		/// </summary>
+		/// <param name="exitAllFirst">If set to true, the ExitAll() method will be called first to close any running instances of KeePass</param>
+		/// <param name="timeout">The time to wait in milliseconds for KeePass to start before showing error message.
+		/// Also applies to waiting for ExitAll if exitAllFirst is true.</param>
+		/// <returns>IPluginHost object from KeePass</returns>
+		public static IPluginHost StartKeePass(bool exitAllFirst, double timeout)
 		{
 			/* vars */
 			string debugDir;
@@ -77,22 +91,25 @@ namespace KeePassPluginTestUtil
 			Stopwatch stopwatch;
 			DialogResult result;
 
-			ExitAll(); // close any open instances of keepass
+			if (exitAllFirst) {
 
-			/* wait for processes to end */
-			stopwatch = new Stopwatch();
-			stopwatch.Start();
-			while ((stopwatch.ElapsedMilliseconds < timeout) && (Process.GetProcessesByName(keepassProc).Length > 0)) {
-				Thread.Sleep(250);
-			}
-			stopwatch.Stop();
+				ExitAll(); // close any open instances of keepass
 
-			/* verify all running instances of KeePass have ended */
-			while (Process.GetProcessesByName(keepassProc).Length > 0) {
-				result = ShowErrorMessage("Running instances of KeyPass did not stop within the specified timeout." +
-					"\n\nClick OK when all running instances of KeyPass are closed.", true);
-				if (result == DialogResult.Cancel) {
-					return null;
+				/* wait for processes to end */
+				stopwatch = new Stopwatch();
+				stopwatch.Start();
+				while ((stopwatch.ElapsedMilliseconds < timeout) && (Process.GetProcessesByName(keepassProc).Length > 0)) {
+					Thread.Sleep(250);
+				}
+				stopwatch.Stop();
+
+				/* verify all running instances of KeePass have ended */
+				while (Process.GetProcessesByName(keepassProc).Length > 0) {
+					result = ShowErrorMessage("Running instances of KeyPass did not stop within the specified timeout." +
+						"\n\nClick OK when all running instances of KeyPass are closed.", true);
+					if (result == DialogResult.Cancel) {
+						return null;
+					}
 				}
 			}
 
@@ -158,13 +175,15 @@ namespace KeePassPluginTestUtil
 			}
 
 			/* wait for KeyPass to open */
-			stopwatch.Restart();
+			stopwatch = new Stopwatch();
+			stopwatch.Start();
 			while ((stopwatch.ElapsedMilliseconds < timeout) && 
 				((KeePass.Program.MainForm == null) || (KeePass.Program.MainForm.PluginHost == null))) {
 				Thread.Sleep(250);
 			}
 			stopwatch.Stop();
-
+			Thread.Sleep(500); // give windows time to animate
+			
 			/* verify that program started and file is open */
 			while (KeePass.Program.MainForm == null) {
 				result = ShowErrorMessage("KeePass did not start within the specified timeout." +
@@ -180,9 +199,16 @@ namespace KeePassPluginTestUtil
 					return null;
 				}
 			}
+			
+			// plugins are disabled in config file so that none are loaded automatically
+			// re-enable now so that we can get to the plugin dialog
+			KeePass.App.AppPolicy.Current.Plugins = true;	
 
 			return KeePass.Program.MainForm.PluginHost;
 		}
+		
+
+		/* convience methods */
 
 		/// <summary>
 		/// Helper method for showing Error MessageBox with OK button
@@ -209,6 +235,6 @@ namespace KeePassPluginTestUtil
 				buttons = MessageBoxButtons.OK;
 			}
 			return MessageBox.Show(message, "Error", buttons, MessageBoxIcon.Error);
-		}
-	}
+		}		
+	}	
 }

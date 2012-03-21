@@ -28,14 +28,11 @@ namespace KeePassPluginTestUtil
 		{
 			/* vars */
 			string[] args;
-			NotifyIcon notifyIcon;
 			Stopwatch stopwatch;
-			
-			/* grab notification icon */
-			if (KeePass.Program.MainForm != null) {
-				notifyIcon = KeePass.Program.MainForm.MainNotifyIcon;
-			} else {
-				notifyIcon = null;
+
+			// workaround for notification icon not closing
+			if (KeePass.Program.MainForm != null) {				
+					KeePass.Program.MainForm.MainNotifyIcon.Visible = false;				
 			}
 
 			args = new string[] { "--exit-all" };
@@ -46,11 +43,7 @@ namespace KeePassPluginTestUtil
 			stopwatch.Start();
 			while ((stopwatch.ElapsedMilliseconds < defaultTimeout) && (KeePass.Program.MainForm != null)) {
 				Thread.Sleep(250);
-			}
-			// workaround for notification icon not closing
-			if ((KeePass.Program.MainForm == null) && (notifyIcon != null)) {
-				notifyIcon.Dispose();
-			}
+			}			
 		}
 
 		/// <summary>

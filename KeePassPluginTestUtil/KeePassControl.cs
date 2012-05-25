@@ -6,6 +6,9 @@ using System.Windows.Forms;
 using KeePass.Plugins;
 using System.Reflection;
 using KeePass.Forms;
+using KeePassLib.Interfaces;
+using System.Collections.Generic;
+using KeePass.UI;
 
 namespace KeePassPluginTestUtil
 {
@@ -20,7 +23,7 @@ namespace KeePassPluginTestUtil
 		private const string configFile = "KeePass.config.xml";
 		private const string dbFile = "test.kdbx";
 		private const string password = "test";
-		
+
 		/// <summary>
 		/// Sends signal for all running instances of KeePass to exit.
 		/// </summary>
@@ -31,8 +34,8 @@ namespace KeePassPluginTestUtil
 			Stopwatch stopwatch;
 
 			// workaround for notification icon not closing
-			if (KeePass.Program.MainForm != null) {				
-					KeePass.Program.MainForm.MainNotifyIcon.Visible = false;				
+			if (KeePass.Program.MainForm != null) {
+				KeePass.Program.MainForm.MainNotifyIcon.Visible = false;
 			}
 
 			args = new string[] { "--exit-all" };
@@ -43,7 +46,7 @@ namespace KeePassPluginTestUtil
 			stopwatch.Start();
 			while ((stopwatch.ElapsedMilliseconds < defaultTimeout) && (KeePass.Program.MainForm != null)) {
 				Thread.Sleep(250);
-			}			
+			}
 		}
 
 		/// <summary>
@@ -117,8 +120,8 @@ namespace KeePassPluginTestUtil
 				return null;
 			}
 
-			/* verify files */			
-			
+			/* verify files */
+
 			keepassExeFile = Path.Combine(debugDir, keepassExe);
 			if (!File.Exists(keepassExeFile)) {
 				ShowErrorMessage("KeePass executable file '" + keepassExeFile + "' does not exist." +
@@ -128,7 +131,7 @@ namespace KeePassPluginTestUtil
 			}
 
 			debugConfigFile = Path.Combine(debugDir, configFile);
-			try {				
+			try {
 				File.WriteAllText(debugConfigFile, Properties.Resources.KeePass_config);
 			} catch (Exception ex) {
 				ShowErrorMessage("Error writing config file '" + debugConfigFile + "'." +
@@ -143,7 +146,7 @@ namespace KeePassPluginTestUtil
 				ShowErrorMessage("Error writing database file '" + debugDbFile + "'." +
 					"\n\n" + ex.Message);
 				return null;
-			}			
+			}
 
 			/* start keepass with test db */
 			try {
@@ -170,13 +173,13 @@ namespace KeePassPluginTestUtil
 			/* wait for KeyPass to open */
 			stopwatch = new Stopwatch();
 			stopwatch.Start();
-			while ((stopwatch.ElapsedMilliseconds < timeout) && 
+			while ((stopwatch.ElapsedMilliseconds < timeout) &&
 				((KeePass.Program.MainForm == null) || (KeePass.Program.MainForm.PluginHost == null))) {
 				Thread.Sleep(250);
 			}
 			stopwatch.Stop();
 			Thread.Sleep(500); // give windows time to animate
-			
+
 			/* verify that program started and file is open */
 			while (KeePass.Program.MainForm == null) {
 				result = ShowErrorMessage("KeePass did not start within the specified timeout." +
@@ -192,14 +195,53 @@ namespace KeePassPluginTestUtil
 					return null;
 				}
 			}
-			
+
 			// plugins are disabled in config file so that none are loaded automatically
 			// re-enable now so that we can get to the plugin dialog
-			KeePass.App.AppPolicy.Current.Plugins = true;	
+			KeePass.App.AppPolicy.Current.Plugins = true;
 
 			return KeePass.Program.MainForm.PluginHost;
 		}
-		
+
+
+		public static void CreatePlgx(string projectPath, string keepassVersion, string dotnetVersion, string os,
+			string pointerSize, string preBuild, string postBuild)
+		{
+			List<string> args = new List<string>();
+			args.Add("--plgx-create");
+			if (projectPath != null) {
+				args.Add(projectPath);
+			}
+			if (keepassVersion != null) {
+				args.Add("--plgx-prereq-kp:" + keepassVersion);
+			}
+			if (dotnetVersion != null) {
+				args.Add("--plgx-prereq-net:" + dotnetVersion);
+			}
+			if (os != null) {
+				args.Add("--plgx-prereq-os:" + os);
+			}
+			if (pointerSize != null) {
+				args.Add("--plgx-prereq-ptr:" + pointerSize);
+			}
+			if (preBuild != null) {
+				args.Add("--plgx-build-pre:\"" + preBuild + "\"");
+			}
+			if (postBuild != null) {
+				args.Add("--plgx-build-post:\"" + postBuild + "\"");
+			}
+			KeePass.Program.Main(args.ToArray());
+		}
+
+		public static void LoadPlgx(string plgxPath)
+		{
+			OnDemandStatusDialog dlgStatus = new OnDemandStatusDialog(true, null);
+			dlgStatus.StartLogging(plgxPath, false);
+
+			KeePass.Plugins.PlgxPlugin.Load(plgxPath, dlgStatus);
+
+			dlgStatus.EndLogging();			
+		}
 
 		/* convience methods */
 
@@ -228,6 +270,8 @@ namespace KeePassPluginTestUtil
 				buttons = MessageBoxButtons.OK;
 			}
 			return MessageBox.Show(message, "Error", buttons, MessageBoxIcon.Error);
-		}		
-	}	
+		}
+
+		
+	}
 }

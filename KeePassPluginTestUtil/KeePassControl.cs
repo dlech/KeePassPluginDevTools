@@ -204,43 +204,47 @@ namespace KeePassPluginTestUtil
 		}
 
 
-		public static void CreatePlgx(string projectPath, string keepassVersion, string dotnetVersion, string os,
-			string pointerSize, string preBuild, string postBuild)
+		public static void CreatePlgx(PlgxBuildOptions options)
 		{
 			List<string> args = new List<string>();
 			args.Add("--plgx-create");
-			if (projectPath != null) {
-				args.Add(projectPath);
+            if (options.projectPath != null) {
+                args.Add(options.projectPath);
 			}
-			if (keepassVersion != null) {
-				args.Add("--plgx-prereq-kp:" + keepassVersion);
+            if (options.keepassVersion != null) {
+                args.Add("--plgx-prereq-kp:" + options.keepassVersion);
 			}
-			if (dotnetVersion != null) {
-				args.Add("--plgx-prereq-net:" + dotnetVersion);
+            if (options.dotnetVersion != null) {
+                args.Add("--plgx-prereq-net:" + options.dotnetVersion);
 			}
-			if (os != null) {
-				args.Add("--plgx-prereq-os:" + os);
+            if (options.os != null) {
+                args.Add("--plgx-prereq-os:" + options.os);
 			}
-			if (pointerSize != null) {
-				args.Add("--plgx-prereq-ptr:" + pointerSize);
+            if (options.pointerSize != null) {
+                args.Add("--plgx-prereq-ptr:" + options.pointerSize);
 			}
-			if (preBuild != null) {
-				args.Add("--plgx-build-pre:\"" + preBuild + "\"");
+            if (options.preBuild != null) {
+                args.Add("--plgx-build-pre:\"" + options.preBuild + "\"");
 			}
-			if (postBuild != null) {
-				args.Add("--plgx-build-post:\"" + postBuild + "\"");
+            if (options.postBuild != null) {
+                args.Add("--plgx-build-post:\"" + options.postBuild + "\"");
 			}
 			KeePass.Program.Main(args.ToArray());
 		}
 
 		public static void LoadPlgx(string plgxPath)
 		{
-			OnDemandStatusDialog dlgStatus = new OnDemandStatusDialog(true, null);
-			dlgStatus.StartLogging(plgxPath, false);
+            MethodInvoker methodInvoker = new MethodInvoker(delegate()
+            {
+                OnDemandStatusDialog dlgStatus = new OnDemandStatusDialog(true, null);
+                dlgStatus.StartLogging(plgxPath, false);
 
-			KeePass.Plugins.PlgxPlugin.Load(plgxPath, dlgStatus);
+                KeePass.Plugins.PlgxPlugin.Load(plgxPath, dlgStatus);
 
-			dlgStatus.EndLogging();			
+                dlgStatus.EndLogging();
+            });
+
+            InvokeMainWindow(methodInvoker);
 		}
 
 		/* convience methods */
@@ -272,6 +276,16 @@ namespace KeePassPluginTestUtil
 			return MessageBox.Show(message, "Error", buttons, MessageBoxIcon.Error);
 		}
 
+        public static void InvokeMainWindow(MethodInvoker methodInvoker)
+        {
+            Form mainWindow = KeePass.Program.MainForm;
+
+            if (mainWindow.InvokeRequired) {
+                mainWindow.Invoke(methodInvoker);
+            } else {
+                methodInvoker.Invoke();
+            }
+        }
 		
 	}
 }

@@ -64,10 +64,11 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\test2.kdbx" />
     <None Include="Resources\keepass.config.xml">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Resources\test.kdbx" />
+    <None Include="Resources\test1.kdbx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\keepass2\KeePass\KeePass.csproj">

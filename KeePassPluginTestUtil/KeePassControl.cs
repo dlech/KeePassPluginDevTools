@@ -9,6 +9,8 @@ using KeePass.Forms;
 using KeePassLib.Interfaces;
 using System.Collections.Generic;
 using KeePass.UI;
+using KeePassLib.Serialization;
+using KeePassLib.Keys;
 
 namespace KeePassPluginTestUtil
 {
@@ -21,7 +23,8 @@ namespace KeePassPluginTestUtil
 		private const string keepassProc = "KeePass";
 		private const string keepassExe = "KeePass.exe";
 		private const string configFile = "KeePass.config.xml";
-		private const string dbFile = "test.kdbx";
+		private const string dbFile1 = "test1.kdbx";
+        private const string dbFile2 = "test2.kdbx";
 		private const string password = "test";
 
 		/// <summary>
@@ -34,10 +37,13 @@ namespace KeePassPluginTestUtil
 			Stopwatch stopwatch;
 
 			// workaround for notification icon not closing
-			if (KeePass.Program.MainForm != null) {
-				KeePass.Program.MainForm.MainNotifyIcon.Visible = false;
-			}
+            MethodInvoker methodInvoker = new MethodInvoker(delegate()
+            {
+                KeePass.Program.MainForm.MainNotifyIcon.Visible = false;
+            });			
+            InvokeMainWindow(methodInvoker);
 
+            /* issue exit all command */
 			args = new string[] { "--exit-all" };
 			KeePass.Program.Main(args);
 
@@ -80,7 +86,7 @@ namespace KeePassPluginTestUtil
 		{
 			/* vars */
 			string debugDir;
-			string debugConfigFile, debugDbFile;
+            string debugConfigFile, testDbFile1, testDbFile2;
 			string keepassExeFile;
 			string[] args;
 			Assembly assembly;
@@ -130,28 +136,39 @@ namespace KeePassPluginTestUtil
 				return null;
 			}
 
+            /* copy files to working directory */
+
 			debugConfigFile = Path.Combine(debugDir, configFile);
 			try {
-				File.WriteAllText(debugConfigFile, Properties.Resources.KeePass_config);
+				File.WriteAllText(debugConfigFile, Properties.Resources.KeePass_config_xml);
 			} catch (Exception ex) {
 				ShowErrorMessage("Error writing config file '" + debugConfigFile + "'." +
 					"\n\n" + ex.Message);
 				return null;
 			}
 
-			debugDbFile = Path.Combine(debugDir, dbFile);
+			testDbFile1 = Path.Combine(debugDir, dbFile1);
 			try {
-				File.WriteAllBytes(debugDbFile, Properties.Resources.test);
+				File.WriteAllBytes(testDbFile1, Properties.Resources.test1_kdbx);
 			} catch (Exception ex) {
-				ShowErrorMessage("Error writing database file '" + debugDbFile + "'." +
+				ShowErrorMessage("Error writing database file '" + testDbFile1 + "'." +
 					"\n\n" + ex.Message);
 				return null;
 			}
 
-			/* start keepass with test db */
+            testDbFile2 = Path.Combine(debugDir, dbFile2);
+            try {
+                File.WriteAllBytes(testDbFile2, Properties.Resources.test2_kdbx);
+            } catch (Exception ex) {
+                ShowErrorMessage("Error writing database file '" + testDbFile2 + "'." +
+                    "\n\n" + ex.Message);
+                return null;
+            }
+
+			/* start keepass with test1 db */
 			try {
 				args = new string[] { 
-					debugDbFile,
+					testDbFile1,
 					"-pw:" + password,
 					"--debug"
 				};
@@ -188,6 +205,25 @@ namespace KeePassPluginTestUtil
 					return null;
 				}
 			}
+
+            /* open second database file */
+            try {
+                IOConnectionInfo ioConnection = new IOConnectionInfo();
+                ioConnection.Path = testDbFile2;
+                CompositeKey compositeKey = new CompositeKey();
+                KcpPassword passwordKey = new KcpPassword(password);
+                compositeKey.AddUserKey(passwordKey);
+                MethodInvoker methodInvoker = new MethodInvoker(delegate()
+                {
+                    KeePass.Program.MainForm.OpenDatabase(ioConnection, compositeKey, true);
+                });
+                InvokeMainWindow(methodInvoker);
+            } catch (Exception ex) {
+                ShowErrorMessage("An exception occured while opening second database file" +
+                    "\n\n" + ex.Message);
+                return null;
+            }
+
 			while (KeePass.Program.MainForm.PluginHost == null) {
 				result = ShowErrorMessage("Cannot get PluginHost object. Make sure a file is open in KeePass." +
 					"\n\nClick OK when file is open.", true);
@@ -279,11 +315,12 @@ namespace KeePassPluginTestUtil
         public static void InvokeMainWindow(MethodInvoker methodInvoker)
         {
             Form mainWindow = KeePass.Program.MainForm;
-
-            if (mainWindow.InvokeRequired) {
-                mainWindow.Invoke(methodInvoker);
-            } else {
-                methodInvoker.Invoke();
+            if (mainWindow != null) {
+                if (mainWindow.InvokeRequired) {
+                    mainWindow.Invoke(methodInvoker);
+                } else {
+                    methodInvoker.Invoke();
+                }
             }
         }
 		

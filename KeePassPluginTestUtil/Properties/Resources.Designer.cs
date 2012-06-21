@@ -79,16 +79,9 @@ namespace KeePassPluginTestUtil.Properties {
             }
         }
         
-        internal static byte[] test1_kdbx {
+        internal static byte[] test_kdbx {
             get {
-                object obj = ResourceManager.GetObject("test1_kdbx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        internal static byte[] test2_kdbx {
-            get {
-                object obj = ResourceManager.GetObject("test2_kdbx", resourceCulture);
+                object obj = ResourceManager.GetObject("test_kdbx", resourceCulture);
                 return ((byte[])(obj));
             }
         }

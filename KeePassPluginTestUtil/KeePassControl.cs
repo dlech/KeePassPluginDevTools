@@ -20,9 +20,9 @@ namespace KeePassPluginTestUtil
     public static class KeePassControl
     {
         private const double defaultTimeout = 2000; // msec
-        private const string keepassProc = "KeePass";
-        private const string keepassExe = "KeePass.exe";
-        private const string configFile = "KeePass.config.xml";
+        private const string keepassProcName = "KeePass";
+        private const string keepassExeName = "KeePass.exe";
+        private const string configFileName = "KeePass.config.xml";
         private const string dbFileName = "test{0}.kdbx";
         private const string password = "test";
 
@@ -35,22 +35,15 @@ namespace KeePassPluginTestUtil
             string[] args;
             Stopwatch stopwatch;
 
-            // workaround for notification icon not closing
-            //MethodInvoker methodInvoker = new MethodInvoker(delegate()
-            //{
-            //    KeePass.Program.MainForm.MainNotifyIcon.Visible = false;
-            //});
-            //InvokeMainWindow(methodInvoker);
+            // workaround for notification icon not closing            
+            InvokeMainWindow((MethodInvoker)delegate()
+            {
+                KeePass.Program.MainForm.MainNotifyIcon.Visible = false;
+            });            
 
             /* issue exit all command */
             args = new string[] { "--exit-all" };
-            ThreadStart startKeePass = new ThreadStart(delegate()
-            {
-                KeePass.Program.Main(args);
-            });
-            Thread kpThread = new Thread(startKeePass);
-            kpThread.SetApartmentState(ApartmentState.STA);
-            kpThread.Start();
+            StartKeePassProc(args);
 
             /* wait for program to close */
             stopwatch = new Stopwatch();
@@ -58,6 +51,8 @@ namespace KeePassPluginTestUtil
             while ((stopwatch.ElapsedMilliseconds < defaultTimeout) && (KeePass.Program.MainForm != null)) {
                 Thread.Sleep(250);
             }
+
+            // TODO do we want an error message here like when starting?
         }
 
         /// <summary>
@@ -123,13 +118,13 @@ namespace KeePassPluginTestUtil
                 /* wait for processes to end */
                 stopwatch = new Stopwatch();
                 stopwatch.Start();
-                while ((stopwatch.ElapsedMilliseconds < timeout) && (Process.GetProcessesByName(keepassProc).Length > 0)) {
+                while ((stopwatch.ElapsedMilliseconds < timeout) && (Process.GetProcessesByName(keepassProcName).Length > 0)) {
                     Thread.Sleep(250);
                 }
                 stopwatch.Stop();
 
                 /* verify all running instances of KeePass have ended */
-                while (Process.GetProcessesByName(keepassProc).Length > 0) {
+                while (Process.GetProcessesByName(keepassProcName).Length > 0) {
                     result = ShowErrorMessage("Running instances of KeyPass did not stop within the specified timeout." +
                         "\n\nClick OK when all running instances of KeyPass are closed.", true);
                     if (result == DialogResult.Cancel) {
@@ -145,13 +140,13 @@ namespace KeePassPluginTestUtil
             // really shouldn't need to check this
             if (!Directory.Exists(debugDir)) {
                 ShowErrorMessage("Debug directory '" + debugDir + "' does not exist." +
-                    "\nIt should be the location of " + keepassExe);
+                    "\nIt should be the location of " + keepassExeName);
                 return null;
             }
 
             /* verify files */
 
-            keepassExeFile = Path.Combine(debugDir, keepassExe);
+            keepassExeFile = Path.Combine(debugDir, keepassExeName);
             if (!File.Exists(keepassExeFile)) {
                 ShowErrorMessage("KeePass executable file '" + keepassExeFile + "' does not exist." +
                     "\nPlease make sure it is set up in References and 'Copy Local' property is set to true" +
@@ -161,7 +156,7 @@ namespace KeePassPluginTestUtil
 
             /* copy files to working directory */
             if (copyConfig) {
-                debugConfigFile = Path.Combine(debugDir, configFile);
+                debugConfigFile = Path.Combine(debugDir, configFileName);
                 try {
                     File.WriteAllText(debugConfigFile, Properties.Resources.KeePass_config_xml);
                 } catch (Exception ex) {
@@ -184,7 +179,7 @@ namespace KeePassPluginTestUtil
                 }
             }
 
-            /* start keepass with test1 db */
+            /* start keepass with test1.kdbx db */
             try {
                 args = new string[] { 
 					testDbFiles[0],
@@ -192,9 +187,12 @@ namespace KeePassPluginTestUtil
 					"--debug"
 				};
 
+                StartKeePassProc(args);
+
+                /* attach local KeePass instance to the process that we just started */
                 ThreadStart startKeePass = new ThreadStart(delegate()
                 {
-                    KeePass.Program.Main(args);
+                    KeePass.Program.Main(null);
                 });
 
                 Thread kpThread = new Thread(startKeePass);
@@ -215,7 +213,7 @@ namespace KeePassPluginTestUtil
             }
             stopwatch.Stop();
             Thread.Sleep(500); // give windows time to animate
-
+            
             /* verify that program started and file is open */
             while (KeePass.Program.MainForm == null) {
                 result = ShowErrorMessage("KeePass did not start within the specified timeout." +
@@ -255,6 +253,8 @@ namespace KeePassPluginTestUtil
                 }
             }
 
+            // TODO need to wait longer for all files to load.
+
             // plugins are disabled in config file so that none are loaded automatically
             // re-enable now so that we can get to the plugin dialog
             KeePass.App.AppPolicy.Current.Plugins = true;
@@ -288,7 +288,9 @@ namespace KeePassPluginTestUtil
             if (options.postBuild != null) {
                 args.Add("--plgx-build-post:\"" + options.postBuild + "\"");
             }
-            KeePass.Program.Main(args.ToArray());
+            StartKeePassProc(args.ToArray());
+
+            // TODO block until process is ended
         }
 
         public static void LoadPlgx(string plgxPath)
@@ -333,6 +335,25 @@ namespace KeePassPluginTestUtil
                 buttons = MessageBoxButtons.OK;
             }
             return MessageBox.Show(message, "Error", buttons, MessageBoxIcon.Error);
+        }
+
+        /// <summary>
+        /// Starts keypass in a separate process
+        /// </summary>
+        /// <param name="args">argument to pass</param>
+        /// <returns>the process that was started</returns>
+        private static Process StartKeePassProc(string[] args)
+        {
+            Assembly assembly = Assembly.GetAssembly(typeof(KeePass.Program));
+            string debugDir = Path.GetDirectoryName(assembly.Location);
+            string keepassExeFile = Path.Combine(debugDir, keepassExeName);
+
+            Process keepassProc = new Process();
+            keepassProc.StartInfo.FileName = keepassExeFile;
+            keepassProc.StartInfo.Arguments = string.Join(" ", args);
+            keepassProc.Start();
+
+            return keepassProc;
         }
 
         public static void InvokeMainWindow(MethodInvoker methodInvoker)

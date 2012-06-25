@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using KeePass.UI;
 using KeePassLib.Serialization;
 using KeePassLib.Keys;
+using System.Security.Policy;
 
 namespace KeePassPluginTestUtil
 {
@@ -19,7 +20,7 @@ namespace KeePassPluginTestUtil
     /// </summary>
     public static class KeePassControl
     {
-        private const double defaultTimeout = 2000; // msec
+        private const double defaultTimeout = 3000; // msec
         private const string keepassProcName = "KeePass";
         private const string keepassExeName = "KeePass.exe";
         private const string configFileName = "KeePass.config.xml";
@@ -35,29 +36,46 @@ namespace KeePassPluginTestUtil
             string[] args;
             Stopwatch stopwatch;
 
-            // workaround for notification icon not closing            
+            // close the instance that we are working with if it exists        
             InvokeMainWindow((MethodInvoker)delegate()
             {
-                KeePass.Program.MainForm.MainNotifyIcon.Visible = false;
-            });            
+                ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program.MainForm.MainMenu.Items["m_menuFile"];
+                ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu.DropDownItems["m_menuFileExit"];
+                ExitMenuItem.PerformClick();
+                //KeePass.Program.MainForm.Dispose();
+            });
+            stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while ((stopwatch.ElapsedMilliseconds < defaultTimeout) &&
+                (KeePass.Program.MainForm != null && !KeePass.Program.MainForm.IsDisposed)) {
+                Thread.Sleep(250);
+            }
+            while (KeePass.Program.MainForm != null && !KeePass.Program.MainForm.IsDisposed) {
+                ShowErrorMessage("KeePass did not stop within the specified timeout." +
+                    "\n\n" + "Click OK when all KeePass processes have been terminated.");
+            }
 
             /* issue exit all command */
             args = new string[] { "--exit-all" };
             StartKeePassProc(args);
 
             /* wait for program to close */
-            stopwatch = new Stopwatch();
+            stopwatch.Reset();
             stopwatch.Start();
-            while ((stopwatch.ElapsedMilliseconds < defaultTimeout) && (KeePass.Program.MainForm != null)) {
+            while ((stopwatch.ElapsedMilliseconds < defaultTimeout) &&
+                (Process.GetProcessesByName(keepassProcName).Length > 0)) {
                 Thread.Sleep(250);
             }
-
-            // TODO do we want an error message here like when starting?
+            while (Process.GetProcessesByName(keepassProcName).Length > 0) {
+                ShowErrorMessage("KeePass did not stop within the specified timeout." +
+                    "\n\n" + "Click OK when all KeePass processes have been terminated.");
+            }
         }
 
         /// <summary>
-        /// Stops all running instances of KeePass, then starts a new instance of KeePass 
-        /// with a barebones database and (mostly) default configuration.
+        /// Stops all running instances of KeePass, then starts a new instance
+        /// of KeePass with a barebones database and (mostly) default
+        /// configuration.
         /// </summary>
         /// <returns>IPluginHost object from KeePass</returns>
         public static IPluginHost StartKeePass()
@@ -74,29 +92,45 @@ namespace KeePassPluginTestUtil
         }
 
         /// <summary>
-        /// Starts a new instance of KeePass with a barebones database and (mostly) default configuration.
+        /// Starts a new instance of KeePass with a barebones database and
+        /// (mostly) default configuration.
         /// </summary>
-        /// <param name="exitAllFirst">If set to true, the ExitAll() method will be called first to close any running instances of KeePass</param>
+        /// <param name="exitAllFirst">If set to true, the ExitAll() method
+        /// will be called first to close any running instances of KeePass
+        /// </param>
         /// <returns>IPluginHost object from KeePass</returns>
         public static IPluginHost StartKeePass(bool exitAllFirst)
         {
             return StartKeePass(exitAllFirst, true, 1, defaultTimeout);
         }
 
-        public static IPluginHost StartKeePass(bool exitAllFirst, bool copyConfig, int numDbFiles)
+        public static IPluginHost StartKeePass(bool exitAllFirst,
+            bool copyConfig, int numDbFiles)
         {
-            return StartKeePass(exitAllFirst, copyConfig, numDbFiles, defaultTimeout);
+            return StartKeePass(exitAllFirst, copyConfig, numDbFiles,
+                defaultTimeout);
         }
 
         /// <summary>
-        /// Starts a new instance of KeePass with a barebones database and (mostly) default configuration.
+        /// Starts a new instance of KeePass with a barebones database and
+        /// (mostly) default configuration.
         /// </summary>
-        /// <param name="exitAllFirst">If set to true, the ExitAll() method will be called first to close any running instances of KeePass</param>
-        /// <param name="timeout">The time to wait in milliseconds for KeePass to start before showing error message.
-        /// Also applies to waiting for ExitAll if exitAllFirst is true.</param>
+        /// <param name="exitAllFirst">If set to true, the ExitAll() method
+        /// will be called first to close any running instances of KeePass
+        /// </param>
+        /// <param name="timeout">The time to wait in milliseconds for KeePass
+        /// to start before showing error message.
+        /// Also applies to waiting for ExitAll if exitAllFirst is true.
+        /// </param>
         /// <returns>IPluginHost object from KeePass</returns>
-        public static IPluginHost StartKeePass(bool exitAllFirst, bool copyConfig, int numDbFiles, double timeout)
+        public static IPluginHost StartKeePass(bool exitAllFirst,
+            bool copyConfig, int numDbFiles, double timeout)
         {
+            if (KeePass.Program.MainForm != null) {
+                ShowErrorMessage("Can only run KeePass once per test (AppDomain)");
+                return null;
+            }
+
             if (numDbFiles < 1) {
                 throw new ArgumentOutOfRangeException("numDbFiles");
             }
@@ -118,7 +152,8 @@ namespace KeePassPluginTestUtil
                 /* wait for processes to end */
                 stopwatch = new Stopwatch();
                 stopwatch.Start();
-                while ((stopwatch.ElapsedMilliseconds < timeout) && (Process.GetProcessesByName(keepassProcName).Length > 0)) {
+                while ((stopwatch.ElapsedMilliseconds < timeout) &&
+                    (Process.GetProcessesByName(keepassProcName).Length > 0)) {
                     Thread.Sleep(250);
                 }
                 stopwatch.Stop();
@@ -168,7 +203,7 @@ namespace KeePassPluginTestUtil
 
             testDbFiles = new List<string>();
             for (int i = 1; i <= numDbFiles; i++) {
-                string testDbFileN = Path.Combine(debugDir, string.Format(dbFileName, i));                
+                string testDbFileN = Path.Combine(debugDir, string.Format(dbFileName, i));
                 try {
                     File.WriteAllBytes(testDbFileN, Properties.Resources.test_kdbx);
                     testDbFiles.Add(testDbFileN);
@@ -182,25 +217,41 @@ namespace KeePassPluginTestUtil
             /* start keepass with test1.kdbx db */
             try {
                 args = new string[] { 
-					testDbFiles[0],
-					"-pw:" + password,
-					"--debug"
-				};
+                    testDbFiles[0],
+                    "-pw:" + password,
+                    "--debug"
+                };
 
                 StartKeePassProc(args);
 
+                //AppDomainSetup keePassDomainSetup = new AppDomainSetup();
+                //keePassDomainSetup.ApplicationBase = Assembly.GetExecutingAssembly().Location;
+                //AppDomain keePassDomain = AppDomain.CreateDomain(
+                //    KeePassControl.keepassProcName +
+                //    KeePassControl.KeePassRunCount,
+                //    new Evidence(AppDomain.CurrentDomain.Evidence),
+                //    keePassDomainSetup); 
+                //foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies()) {
+                //    keePassDomain.Load(asm.FullName);
+                //}                
+                                
                 /* attach local KeePass instance to the process that we just started */
                 ThreadStart startKeePass = new ThreadStart(delegate()
                 {
                     KeePass.Program.Main(null);
+                    //keePassDomain.ExecuteAssembly(Assembly.GetAssembly(typeof(KeePass.Program)).Location);
                 });
-
                 Thread kpThread = new Thread(startKeePass);
                 kpThread.SetApartmentState(ApartmentState.STA);
                 kpThread.Start();
+
+                //keePassDomain.DoCallBack(delegate()
+                //{
+
+                //});
             } catch (Exception ex) {
                 ShowErrorMessage("An exception occured while starting KeePass" +
-                    "\n\n" + ex.Message);
+                    "\n\n" + ex.ToString());
                 return null;
             }
 
@@ -208,13 +259,22 @@ namespace KeePassPluginTestUtil
             stopwatch = new Stopwatch();
             stopwatch.Start();
             while ((stopwatch.ElapsedMilliseconds < timeout) &&
-                ((KeePass.Program.MainForm == null) || (KeePass.Program.MainForm.PluginHost == null))) {
+                ((KeePass.Program.MainForm == null) ||
+                (KeePass.Program.MainForm.PluginHost == null))) {
+
                 Thread.Sleep(250);
             }
+            /* wait for file to open if we asked for at least one file */
+            if (numDbFiles >= 1) {
+                while ((stopwatch.ElapsedMilliseconds < timeout) &&
+                    !KeePass.Program.MainForm.IsAtLeastOneFileOpen()) {
+
+                    Thread.Sleep(250);
+                }
+            }
             stopwatch.Stop();
-            Thread.Sleep(500); // give windows time to animate
-            
-            /* verify that program started and file is open */
+
+            /* verify that program started */
             while (KeePass.Program.MainForm == null) {
                 result = ShowErrorMessage("KeePass did not start within the specified timeout." +
                     "\n\nClick OK when KeyPass has started.", true);
@@ -253,8 +313,6 @@ namespace KeePassPluginTestUtil
                 }
             }
 
-            // TODO need to wait longer for all files to load.
-
             // plugins are disabled in config file so that none are loaded automatically
             // re-enable now so that we can get to the plugin dialog
             KeePass.App.AppPolicy.Current.Plugins = true;
@@ -288,9 +346,10 @@ namespace KeePassPluginTestUtil
             if (options.postBuild != null) {
                 args.Add("--plgx-build-post:\"" + options.postBuild + "\"");
             }
-            StartKeePassProc(args.ToArray());
-
-            // TODO block until process is ended
+            Process keePassProc = StartKeePassProc(args.ToArray());
+            while (!keePassProc.HasExited) {
+                Thread.Sleep(250);
+            }
         }
 
         public static void LoadPlgx(string plgxPath)
@@ -359,7 +418,7 @@ namespace KeePassPluginTestUtil
         public static void InvokeMainWindow(MethodInvoker methodInvoker)
         {
             Form mainWindow = KeePass.Program.MainForm;
-            if (mainWindow != null) {
+            if (mainWindow != null && !mainWindow.IsDisposed) {
                 if (mainWindow.InvokeRequired) {
                     mainWindow.Invoke(methodInvoker);
                 } else {

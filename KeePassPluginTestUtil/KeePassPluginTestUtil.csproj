@@ -47,6 +47,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KeePassAppDomain.cs" />
     <Compile Include="PlgxPackager.cs" />
     <Compile Include="PlgxBuildOptions.cs" />
     <Compile Include="KeePassControl.cs" />

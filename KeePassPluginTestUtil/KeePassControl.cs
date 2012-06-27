@@ -374,7 +374,7 @@ namespace KeePassPluginTestUtil
         /// </summary>
         /// <param name="message">Message to show</param>
         /// <returns>DialogResult from MessageBox</returns>
-        private static DialogResult ShowErrorMessage(string message)
+        internal static DialogResult ShowErrorMessage(string message)
         {
             return ShowErrorMessage(message, false);
         }
@@ -385,7 +385,7 @@ namespace KeePassPluginTestUtil
         /// <param name="message">Message to show</param>
         /// <param name="cancelable">If true, shows OK and Cancel button. If false, shows OK button only</param>
         /// <returns>DialogResult from MessageBox</returns>
-        private static DialogResult ShowErrorMessage(string message, bool cancelable)
+        internal static DialogResult ShowErrorMessage(string message, bool cancelable)
         {
             MessageBoxButtons buttons;
             if (cancelable) {

@@ -22,12 +22,12 @@ namespace KeePassPluginTestUtil
   /// running tests. Use SetData and GetData methods to pass information
   /// between AppDomains.</remarks>
   /// </summary>
-  public class KeePassAppDomain
+  public class KeePassAppDomain : IDisposable
   {
     private AppDomain appDomain;
-    private static int instanceCount = 0;
-    // {0} is instanceCount
-    private const string friendlyName = "KeePass AppDomain #{0}";
+    private bool isKeePassRunning;
+
+    private const string friendlyName = "KeePass AppDomain {0}"; // {0} is guid
     private const string keepassProcessName = "KeePass";
     private const string keepassExeName = "KeePass.exe";
     private const string configFileName = "KeePass.config.xml";
@@ -41,17 +41,35 @@ namespace KeePassPluginTestUtil
     /// </summary>
     public KeePassAppDomain()
     {
-      instanceCount++;
-
+      this.isKeePassRunning = false;
+      string guid = Guid.NewGuid().ToString();
       this.appDomain = AppDomain.CreateDomain(
-          string.Format(friendlyName, instanceCount),
+          string.Format(friendlyName, guid),
           AppDomain.CurrentDomain.Evidence,
           AppDomain.CurrentDomain.SetupInformation);
     }
 
-    ~KeePassAppDomain()
+    public void Dispose()
     {
-      AppDomain.Unload(this.appDomain);
+      if (this.appDomain != null && !this.appDomain.IsFinalizingForUnload()) {
+        if (isKeePassRunning) {
+          this.appDomain.DoCallBack(delegate()
+          {
+            KeePass.Program.MainForm.Invoke((MethodInvoker)delegate()
+            {
+              ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program
+                .MainForm.MainMenu.Items["m_menuFile"];
+              ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu
+                .DropDownItems["m_menuFileExit"];
+              ExitMenuItem.PerformClick();
+            });
+          });
+          while (isKeePassRunning) {
+            // TODO may want a timeout here
+          }
+        }        
+        AppDomain.Unload(this.appDomain);
+      }
     }
 
     /// <summary>
@@ -71,35 +89,7 @@ namespace KeePassPluginTestUtil
             KeePass.Program.MainForm != null);
       });
       return (bool)GetData(isInitalizedName);
-    }
-
-    /// <summary>
-    /// Checks to see if the instance of KeePass connected with this
-    /// AppDomain is running
-    /// </summary>
-    /// <returns>true if KeePass is running in this AppDomain</returns>
-    public bool IsKeePassRunning()
-    {
-      string isRunningName = "KEPASS_IS_RUNNING";
-      DoCallBack(delegate()
-      {
-        AppDomain.CurrentDomain.SetData(
-            isRunningName,
-            KeePass.Program.MainForm != null &&
-            !KeePass.Program.MainForm.IsDisposed);
-      });
-      return (bool)GetData(isRunningName);
-    }
-
-    /// <summary>
-    /// Checks to see if any instance of KeePass is running (not just
-    /// in this AppDomain).
-    /// </summary>
-    /// <returns>true if any KeePass.exe is running</returns>
-    public bool IsAnyKeePassRunning()
-    {
-      return (Process.GetProcessesByName(keepassProcessName).Length > 0);
-    }
+    }       
 
     /// <summary>
     /// Starts KeePass in the current AppDomain
@@ -200,9 +190,14 @@ namespace KeePassPluginTestUtil
         }
         Thread keepassThread = new Thread((ThreadStart)delegate()
         {
-          this.appDomain.ExecuteAssembly(
-              Assembly.GetAssembly(typeof(KeePass.Program)).Location,
-              argList.ToArray());
+          this.isKeePassRunning = true;
+          try {
+            this.appDomain.ExecuteAssembly(
+                Assembly.GetAssembly(typeof(KeePass.Program)).Location,
+                argList.ToArray());
+          } finally {
+            this.isKeePassRunning = false;
+          }
         });
         keepassThread.SetApartmentState(ApartmentState.STA);
         keepassThread.Start();

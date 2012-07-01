@@ -12,6 +12,7 @@ using KeePass.UI;
 using KeePassLib.Serialization;
 using KeePassLib.Keys;
 using System.Security.Policy;
+using KeePassPluginTestUtil.Properties;
 
 namespace KeePassPluginTestUtil
 {
@@ -39,20 +40,26 @@ namespace KeePassPluginTestUtil
       // close the instance that we are working with if it exists        
       InvokeMainWindow((MethodInvoker)delegate()
       {
-        ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program.MainForm.MainMenu.Items["m_menuFile"];
-        ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu.DropDownItems["m_menuFileExit"];
+        ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program
+          .MainForm.MainMenu.Items["m_menuFile"];
+        ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu
+          .DropDownItems["m_menuFileExit"];
         ExitMenuItem.PerformClick();
         //KeePass.Program.MainForm.Dispose();
       });
       stopwatch = new Stopwatch();
       stopwatch.Start();
       while ((stopwatch.ElapsedMilliseconds < defaultTimeout) &&
-          (KeePass.Program.MainForm != null && !KeePass.Program.MainForm.IsDisposed)) {
+          (KeePass.Program.MainForm != null &&
+          !KeePass.Program.MainForm.IsDisposed)) {
         Thread.Sleep(250);
       }
-      while (KeePass.Program.MainForm != null && !KeePass.Program.MainForm.IsDisposed) {
-        ShowErrorMessage("KeePass did not stop within the specified timeout." +
-            "\n\n" + "Click OK when all KeePass processes have been terminated.");
+      while (KeePass.Program.MainForm != null &&
+        !KeePass.Program.MainForm.IsDisposed) {
+        ShowErrorMessage(
+          "KeePass did not stop within the specified timeout." +
+          "\n\n" +
+          "Click OK when all KeePass processes have been terminated.");
       }
 
       /* issue exit all command */
@@ -68,7 +75,8 @@ namespace KeePassPluginTestUtil
       }
       while (Process.GetProcessesByName(keepassProcName).Length > 0) {
         ShowErrorMessage("KeePass did not stop within the specified timeout." +
-            "\n\n" + "Click OK when all KeePass processes have been terminated.");
+            "\n\n" +
+            "Click OK when all KeePass processes have been terminated.");
       }
     }
 
@@ -141,8 +149,8 @@ namespace KeePassPluginTestUtil
       }
 
       /* vars */
-      string debugDir;
-      string debugConfigFile;
+      string assmDir;
+      string configFile;
       List<string> testDbFiles;
       string keepassExeFile;
       string[] args;
@@ -151,56 +159,39 @@ namespace KeePassPluginTestUtil
       DialogResult result;
 
       if (exitAllFirst) {
-
         ExitAll(); // close any open instances of keepass
-
-        /* wait for processes to end */
-        stopwatch = new Stopwatch();
-        stopwatch.Start();
-        while ((stopwatch.ElapsedMilliseconds < timeout) &&
-            (Process.GetProcessesByName(keepassProcName).Length > 0)) {
-          Thread.Sleep(250);
-        }
-        stopwatch.Stop();
-
-        /* verify all running instances of KeePass have ended */
-        while (Process.GetProcessesByName(keepassProcName).Length > 0) {
-          result = ShowErrorMessage("Running instances of KeyPass did not stop within the specified timeout." +
-              "\n\nClick OK when all running instances of KeyPass are closed.", true);
-          if (result == DialogResult.Cancel) {
-            return null;
-          }
-        }
       }
 
       /* verify directories */
 
       assembly = Assembly.GetAssembly(typeof(KeePass.Program));
-      debugDir = Path.GetDirectoryName(assembly.Location);
+      assmDir = Path.GetDirectoryName(assembly.Location);
       // really shouldn't need to check this
-      if (!Directory.Exists(debugDir)) {
-        ShowErrorMessage("Debug directory '" + debugDir + "' does not exist." +
+      if (!Directory.Exists(assmDir)) {
+        ShowErrorMessage("Directory '" + assmDir + "' does not exist." +
             "\nIt should be the location of " + keepassExeName);
         return null;
       }
 
       /* verify files */
 
-      keepassExeFile = Path.Combine(debugDir, keepassExeName);
+      keepassExeFile = Path.Combine(assmDir, keepassExeName);
       if (!File.Exists(keepassExeFile)) {
-        ShowErrorMessage("KeePass executable file '" + keepassExeFile + "' does not exist." +
-            "\nPlease make sure it is set up in References and 'Copy Local' property is set to true" +
-            "\nor fix 'keepassExe' in 'KeePassControl.cs'");
+        ShowErrorMessage("KeePass executable file '" + keepassExeFile +
+          "' does not exist." +
+          "\nPlease make sure it is set up in References and 'Copy Local' "+
+          "property is set to true" +
+          "\nor fix 'keepassExe' in 'KeePassControl.cs'");
         return null;
       }
 
       /* copy files to working directory */
       if (copyConfig) {
-        debugConfigFile = Path.Combine(debugDir, configFileName);
+        configFile = Path.Combine(assmDir, configFileName);
         try {
-          File.WriteAllText(debugConfigFile, Properties.Resources.KeePass_config_xml);
+          File.WriteAllText(configFile, Resources.KeePass_config_xml);
         } catch (Exception ex) {
-          ShowErrorMessage("Error writing config file '" + debugConfigFile + "'." +
+          ShowErrorMessage("Error writing config file '" + configFile + "'." +
               "\n\n" + ex.Message);
           return null;
         }
@@ -208,13 +199,14 @@ namespace KeePassPluginTestUtil
 
       testDbFiles = new List<string>();
       for (int i = 1; i <= numDbFiles; i++) {
-        string testDbFileN = Path.Combine(debugDir, string.Format(dbFileName, i));
+        string testDbFileN = Path.Combine(assmDir,
+          string.Format(dbFileName, i));
         try {
-          File.WriteAllBytes(testDbFileN, Properties.Resources.test_kdbx);
+          File.WriteAllBytes(testDbFileN, Resources.test_kdbx);
           testDbFiles.Add(testDbFileN);
         } catch (Exception ex) {
-          ShowErrorMessage("Error writing database file '" + testDbFileN + "'." +
-              "\n\n" + ex.Message);
+          ShowErrorMessage("Error writing database file '" + testDbFileN +
+            "'." + "\n\n" + ex.Message);
           return null;
         }
       }
@@ -334,10 +326,10 @@ namespace KeePassPluginTestUtil
         args.Add("--plgx-prereq-ptr:" + options.pointerSize);
       }
       if (options.preBuild != null) {
-        args.Add("--plgx-build-pre:\"" + options.preBuild + "\"");
+        args.Add("--plgx-build-pre:" + options.preBuild);
       }
       if (options.postBuild != null) {
-        args.Add("--plgx-build-post:\"" + options.postBuild + "\"");
+        args.Add("--plgx-build-post:" + options.postBuild);
       }
       Process keePassProc = StartKeePassProc(args.ToArray());
 
@@ -401,8 +393,8 @@ namespace KeePassPluginTestUtil
     private static Process StartKeePassProc(string[] args)
     {
       Assembly assembly = Assembly.GetAssembly(typeof(KeePass.Program));
-      string debugDir = Path.GetDirectoryName(assembly.Location);
-      string keepassExeFile = Path.Combine(debugDir, keepassExeName);
+      string assmDir = Path.GetDirectoryName(assembly.Location);
+      string keepassExeFile = Path.Combine(assmDir, keepassExeName);
 
       Process keepassProc = new Process();
       keepassProc.StartInfo.FileName = keepassExeFile;

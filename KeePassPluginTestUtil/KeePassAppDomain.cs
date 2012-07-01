@@ -188,13 +188,17 @@ namespace KeePassPluginTestUtil
         if (debug) {
           argList.Add("--debug");
         }
+        argList.Add("--saveplgxcr");
+        /* start KeePass in a separate process and then attach to it. */
+
+        Process.Start(Assembly.GetAssembly(typeof(KeePass.Program)).Location,
+                string.Join(" ", argList));
         Thread keepassThread = new Thread((ThreadStart)delegate()
         {
           this.isKeePassRunning = true;
           try {
             this.appDomain.ExecuteAssembly(
-                Assembly.GetAssembly(typeof(KeePass.Program)).Location,
-                argList.ToArray());
+                Assembly.GetAssembly(typeof(KeePass.Program)).Location);
           } finally {
             this.isKeePassRunning = false;
           }

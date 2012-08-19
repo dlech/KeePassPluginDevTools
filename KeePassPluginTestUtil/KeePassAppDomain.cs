@@ -73,10 +73,10 @@ namespace KeePassPluginTestUtil
     }
 
     /// <summary>
-    /// Check to see if KeePass has been intalized.
+    /// Check to see if KeePass has been initialized.
     /// </summary>
-    /// <returns>true if KeePass has been intalized.</returns>
-    /// <remarks>This is useful because KeePass can only be initalized
+    /// <returns>true if KeePass has been initialized.</returns>
+    /// <remarks>This is useful because KeePass can only be initialized
     /// (run) once per AppDomain. This will also return true if KeePass
     /// was run in this AppDomain and has been closed</remarks>
     public bool IsKeePassInitalized()
@@ -100,7 +100,7 @@ namespace KeePassPluginTestUtil
     /// <param name="debug">set to true to enable the '--debug' 
     /// command line option</param>
     /// <param name="numDbFiles">Number of database file to load</param>
-    /// <param name="newConfig">Setting to true copies a new defalut 
+    /// <param name="newConfig">Setting to true copies a new default 
     /// configuration file to the working directory before starting 
     /// a new instance of KeePass</param>
     /// <returns>true if KeePass started successfully</returns>
@@ -216,7 +216,7 @@ namespace KeePassPluginTestUtil
         });
       } catch (Exception ex) {
         KeePassControl.ShowErrorMessage(
-            "An exception occured while starting KeePass" +
+            "An exception occurred while starting KeePass" +
             "\n\n" + ex.ToString());
         return false;
       }
@@ -279,15 +279,15 @@ namespace KeePassPluginTestUtil
             });
           } catch (Exception ex) {
             KeePassControl.ShowErrorMessage(
-                "An exception occured while opening additional " +
+                "An exception occurred while opening additional " +
                 "database file" + "\n\n" + ex.Message);
             return false;
           }
         }
       }
 
-      // plugins are disabled in config file so that none are loaded
-      // automatically re-enable now so that we can get to the plugin
+      // plug-ins are disabled in config file so that none are loaded
+      // automatically re-enable now so that we can get to the plug-in
       // dialog
       KeePass.App.AppPolicy.Current.Plugins = true;
 

@@ -25,7 +25,6 @@ namespace KeePassPluginTestUtil
   public class KeePassAppDomain : IDisposable
   {
     private AppDomain appDomain;
-    private bool isKeePassRunning;
 
     private const string friendlyName = "KeePass AppDomain {0}"; // {0} is guid
     private const string keepassProcessName = "KeePass";
@@ -37,11 +36,38 @@ namespace KeePassPluginTestUtil
     private const int keepassStartTimeout = 3000; //msec
 
     /// <summary>
+    /// Check to see if KeePass has been initialized.
+    /// </summary>
+    /// <returns>true if KeePass has been initialized.</returns>
+    /// <remarks>This is useful because KeePass can only be initialized
+    /// (run) once per AppDomain. This will also return true if KeePass
+    /// was run in this AppDomain and has been closed</remarks>
+    public bool KeePassIsInitalized
+    {
+      get
+      {
+        const string isInitalizedName = "KEPASS_IS_INITALIZED";
+        DoCallBack(delegate()
+        {
+          AppDomain.CurrentDomain.SetData(
+              isInitalizedName,
+              KeePass.Program.MainForm != null);
+        });
+        return (bool)GetData(isInitalizedName);
+      }
+    }
+
+    /// <summary>
+    /// true if KeePass is running in this AppDomain
+    /// </summary>
+    public bool KeePassIsRunning { get; private set; }
+
+    /// <summary>
     /// Create a new AppDomain for running a new instance of KeePass
     /// </summary>
     public KeePassAppDomain()
     {
-      this.isKeePassRunning = false;
+      this.KeePassIsRunning = false;
       string guid = Guid.NewGuid().ToString();
       this.appDomain = AppDomain.CreateDomain(
           string.Format(friendlyName, guid),
@@ -51,8 +77,10 @@ namespace KeePassPluginTestUtil
 
     public void Dispose()
     {
-      if (this.appDomain != null && !this.appDomain.IsFinalizingForUnload()) {
-        if (isKeePassRunning) {
+      if (this.appDomain != null && !this.appDomain.IsFinalizingForUnload())
+      {
+        if (KeePassIsRunning)
+        {
           this.appDomain.DoCallBack(delegate()
           {
             KeePass.Program.MainForm.Invoke((MethodInvoker)delegate()
@@ -64,32 +92,15 @@ namespace KeePassPluginTestUtil
               ExitMenuItem.PerformClick();
             });
           });
-          while (isKeePassRunning) {
+          while (KeePassIsRunning)
+          {
             // TODO may want a timeout here
           }
-        }        
+        }
         AppDomain.Unload(this.appDomain);
       }
     }
 
-    /// <summary>
-    /// Check to see if KeePass has been initialized.
-    /// </summary>
-    /// <returns>true if KeePass has been initialized.</returns>
-    /// <remarks>This is useful because KeePass can only be initialized
-    /// (run) once per AppDomain. This will also return true if KeePass
-    /// was run in this AppDomain and has been closed</remarks>
-    public bool IsKeePassInitalized()
-    {
-      const string isInitalizedName = "KEPASS_IS_INITALIZED";
-      DoCallBack(delegate()
-      {
-        AppDomain.CurrentDomain.SetData(
-            isInitalizedName,
-            KeePass.Program.MainForm != null);
-      });
-      return (bool)GetData(isInitalizedName);
-    }       
 
     /// <summary>
     /// Starts KeePass in the current AppDomain
@@ -107,18 +118,21 @@ namespace KeePassPluginTestUtil
     public bool StartKeePass(bool exitAllFirst, bool debug, int numDbFiles,
         bool newConfig)
     {
-      if (IsKeePassInitalized()) {
+      if (KeePassIsInitalized)
+      {
         KeePassControl.ShowErrorMessage(
             "KeePass has already been started in this AppDomain" +
             "\n\nKeePass can only be started once per AppDomain");
         return false;
       }
 
-      if (numDbFiles < 0) {
+      if (numDbFiles < 0)
+      {
         throw new ArgumentOutOfRangeException("numDbFiles");
       }
 
-      if (exitAllFirst) {
+      if (exitAllFirst)
+      {
         KeePassControl.ExitAll();
       }
 
@@ -127,7 +141,8 @@ namespace KeePassPluginTestUtil
       Assembly assembly = Assembly.GetAssembly(typeof(KeePass.Program));
       string debugDir = Path.GetDirectoryName(assembly.Location);
       // really shouldn't need to check this
-      if (!Directory.Exists(debugDir)) {
+      if (!Directory.Exists(debugDir))
+      {
         KeePassControl.ShowErrorMessage("Debug directory '" +
             debugDir + "' does not exist." +
             "\nIt should be the location of " + keepassExeName);
@@ -137,7 +152,8 @@ namespace KeePassPluginTestUtil
       /* verify files */
 
       string keepassExeFile = Path.Combine(debugDir, keepassExeName);
-      if (!File.Exists(keepassExeFile)) {
+      if (!File.Exists(keepassExeFile))
+      {
         KeePassControl.ShowErrorMessage("KeePass executable file '" +
             keepassExeFile + "' does not exist." +
             "\nPlease make sure it is set up in References and " +
@@ -147,13 +163,17 @@ namespace KeePassPluginTestUtil
       }
 
       /* copy files to working directory */
-      if (newConfig) {
+      if (newConfig)
+      {
         string debugConfigFile = Path.Combine(debugDir,
             configFileName);
-        try {
+        try
+        {
           File.WriteAllText(debugConfigFile,
               Properties.Resources.KeePass_config_xml);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
           KeePassControl.ShowErrorMessage(
               "Error writing config file '" + debugConfigFile +
               "'.\n\n" + ex.Message);
@@ -162,14 +182,18 @@ namespace KeePassPluginTestUtil
       }
 
       List<string> testDbFiles = new List<string>();
-      for (int i = 1; i <= numDbFiles; i++) {
+      for (int i = 1; i <= numDbFiles; i++)
+      {
         string testDbFileN = Path.Combine(debugDir,
             string.Format(dbFileName, i));
-        try {
+        try
+        {
           File.WriteAllBytes(testDbFileN,
               Properties.Resources.test_kdbx);
           testDbFiles.Add(testDbFileN);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
           KeePassControl.ShowErrorMessage(
               "Error writing database file '"
               + testDbFileN + "'." +
@@ -178,43 +202,52 @@ namespace KeePassPluginTestUtil
         }
       }
 
-      /* start keepass with test1.kdbx db */
-      try {
+      /* start KeePass with test1.kdbx db */
+      try
+      {
         List<string> argList = new List<string>();
-        if (numDbFiles > 0) {
+        if (numDbFiles > 0)
+        {
           argList.Add(testDbFiles[0]);
           argList.Add("-pw:" + password);
         };
-        if (debug) {
+        if (debug)
+        {
           argList.Add("--debug");
         }
         argList.Add("--saveplgxcr");
 
         /* start KeePass in a separate process and then attach to it. */
-                
+
         Thread keepassThread = new Thread((ThreadStart)delegate()
         {
-          this.isKeePassRunning = true;
-          try {
+          this.KeePassIsRunning = true;
+          try
+          {
             Process.Start(Assembly.GetAssembly(typeof(KeePass.Program)).Location,
                 string.Join(" ", argList));
             this.appDomain.ExecuteAssembly(
                 Assembly.GetAssembly(typeof(KeePass.Program)).Location);
-          } finally {
-            this.isKeePassRunning = false;
+          }
+          finally
+          {
+            this.KeePassIsRunning = false;
           }
         });
         keepassThread.SetApartmentState(ApartmentState.STA);
         keepassThread.Start();
-        
+
         DoCallBack(delegate()
         {
           while (KeePass.Program.MainForm == null ||
-              !KeePass.Program.MainForm.Visible) {
+              !KeePass.Program.MainForm.Visible)
+          {
             Thread.Sleep(250);
           }
         });
-      } catch (Exception ex) {
+      }
+      catch (Exception ex)
+      {
         KeePassControl.ShowErrorMessage(
             "An exception occurred while starting KeePass" +
             "\n\n" + ex.ToString());
@@ -225,24 +258,30 @@ namespace KeePassPluginTestUtil
       Stopwatch stopwatch = new Stopwatch();
       stopwatch.Start();
       while ((stopwatch.ElapsedMilliseconds < keepassStartTimeout) &&
-          (!IsKeePassInitalized())) {
+          (!KeePassIsInitalized))
+      {
         Thread.Sleep(250);
       }
       /* wait for file to open if we asked for at least one file */
-      if (numDbFiles >= 1) {
+      if (numDbFiles >= 1)
+      {
         const string isOneFileOpenName = "KEEPASS_IS_ONE_FILE_OPEN";
         bool isOneFileOpen = false;
         while ((stopwatch.ElapsedMilliseconds < keepassStartTimeout) &&
-            !isOneFileOpen) {
+            !isOneFileOpen)
+        {
           DoCallBack(delegate()
           {
             AppDomain.CurrentDomain.SetData(isOneFileOpenName,
             KeePass.Program.MainForm.IsAtLeastOneFileOpen());
           });
           isOneFileOpen = (bool)GetData(isOneFileOpenName);
-          if (isOneFileOpen) {
+          if (isOneFileOpen)
+          {
             continue;
-          } else {
+          }
+          else
+          {
             Thread.Sleep(250);
           }
         }
@@ -250,19 +289,24 @@ namespace KeePassPluginTestUtil
       stopwatch.Stop();
 
       /* verify that program started */
-      while (!IsKeePassInitalized()) {
+      while (!KeePassIsInitalized)
+      {
         DialogResult result = KeePassControl.ShowErrorMessage(
             "KeePass did not start within the specified timeout." +
             "\n\nClick OK when KeyPass has started.", true);
-        if (result == DialogResult.Cancel) {
+        if (result == DialogResult.Cancel)
+        {
           return false;
         }
       }
 
       /* open additional database files */
-      if (testDbFiles.Count > 1) {
-        for (int i = 1, cnt = testDbFiles.Count; i < cnt; i++) {
-          try {
+      if (testDbFiles.Count > 1)
+      {
+        for (int i = 1, cnt = testDbFiles.Count; i < cnt; i++)
+        {
+          try
+          {
             IOConnectionInfo ioConnection = new IOConnectionInfo();
             ioConnection.Path = testDbFiles[i];
             CompositeKey compositeKey = new CompositeKey();
@@ -277,7 +321,9 @@ namespace KeePassPluginTestUtil
                     ioConnection, compositeKey, true);
               });
             });
-          } catch (Exception ex) {
+          }
+          catch (Exception ex)
+          {
             KeePassControl.ShowErrorMessage(
                 "An exception occurred while opening additional " +
                 "database file" + "\n\n" + ex.Message);

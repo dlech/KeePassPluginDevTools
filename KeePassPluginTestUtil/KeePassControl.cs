@@ -231,7 +231,7 @@ namespace KeePassPluginTestUtil
         kpThread.Start();
 
       } catch (Exception ex) {
-        ShowErrorMessage("An exception occured while starting KeePass" +
+        ShowErrorMessage("An exception occurred while starting KeePass" +
             "\n\n" + ex.ToString());
         return null;
       }

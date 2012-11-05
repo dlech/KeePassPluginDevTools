@@ -373,7 +373,7 @@ namespace KeePassPluginTestUtil
     /// <param name="cancelable">If true, shows OK and Cancel button.
     /// If false, shows OK button only</param>
     /// <returns>DialogResult from MessageBox</returns>
-    internal static DialogResult ShowErrorMessage(string message,
+    private static DialogResult ShowErrorMessage(string message,
       bool cancelable)
     {
       MessageBoxButtons buttons;

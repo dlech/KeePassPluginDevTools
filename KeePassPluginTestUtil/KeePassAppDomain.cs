@@ -24,17 +24,17 @@ namespace KeePassPluginTestUtil
   /// </summary>
   public class KeePassAppDomain : IDisposable
   {
-    private AppDomain appDomain;
-    private static int threadNumber = 0;
+    private AppDomain mAppDomain;
+    private static int mThreadNumber = 0;
 
-    private const string friendlyName = "KeePass AppDomain {0}"; // {0} is guid
-    private const string keepassProcessName = "KeePass";
-    private const string keepassExeName = "KeePass.exe";
-    private const string configFileName = "KeePass.config.xml";
-    private const string dbFileName = "test{0}.kdbx";
-    private const string password = "test";
+    private const string cFriendlyName = "KeePass AppDomain {0}"; // {0} is guid
+    private const string cKeepassProcessName = "KeePass";
+    private const string cKeepassExeName = "KeePass.exe";
+    private const string cConfigFileName = "KeePass.config.xml";
+    private const string cDbFileName = "test{0}.kdbx";
+    private const string cPassword = "test";
 
-    private const int keepassStartTimeout = 5000; //msec
+    private const int cKeepassStartTimeout = 5000; //msec
 
     /// <summary>
     /// Check to see if KeePass has been initialized.
@@ -68,19 +68,19 @@ namespace KeePassPluginTestUtil
     /// </summary>
     public KeePassAppDomain()
     {
-      this.KeePassIsRunning = false;
+      KeePassIsRunning = false;
       string guid = Guid.NewGuid().ToString();
-      this.appDomain = AppDomain.CreateDomain(
-          string.Format(friendlyName, guid),
+      mAppDomain = AppDomain.CreateDomain(
+          string.Format(cFriendlyName, guid),
           AppDomain.CurrentDomain.Evidence,
           AppDomain.CurrentDomain.SetupInformation);
     }
 
     public void Dispose()
     {
-      if (this.appDomain != null && !this.appDomain.IsFinalizingForUnload()) {
+      if (mAppDomain != null && !mAppDomain.IsFinalizingForUnload()) {
         if (KeePassIsRunning) {
-          this.appDomain.DoCallBack(delegate()
+          mAppDomain.DoCallBack(delegate()
           {
             if (KeePass.Program.MainForm == null) {
               return;
@@ -99,7 +99,7 @@ namespace KeePassPluginTestUtil
             // TODO may want a timeout here
           }
         }
-        AppDomain.Unload(this.appDomain);
+        AppDomain.Unload(mAppDomain);
       }
     }
 
@@ -141,13 +141,13 @@ namespace KeePassPluginTestUtil
       // really shouldn't need to check this
       if (!Directory.Exists(debugDir)) {
         Debug.Fail("Debug directory '" + debugDir + "' does not exist. " +
-            "It should be the location of " + keepassExeName);
+            "It should be the location of " + cKeepassExeName);
         return false;
       }
 
       /* verify files */
 
-      string keepassExeFile = Path.Combine(debugDir, keepassExeName);
+      string keepassExeFile = Path.Combine(debugDir, cKeepassExeName);
       if (!File.Exists(keepassExeFile)) {
         Debug.Fail("KeePass executable file '" + keepassExeFile +
             "' does not exist. " +
@@ -160,7 +160,7 @@ namespace KeePassPluginTestUtil
       /* copy files to working directory */
 
       if (newConfig) {
-        string debugConfigFile = Path.Combine(debugDir, configFileName);
+        string debugConfigFile = Path.Combine(debugDir, cConfigFileName);
         try {
           File.WriteAllText(debugConfigFile,
               Properties.Resources.KeePass_config_xml);
@@ -174,7 +174,7 @@ namespace KeePassPluginTestUtil
       List<string> testDbFiles = new List<string>();
       for (int i = 1; i <= numDbFiles; i++) {
         string testDbFileN = Path.Combine(debugDir,
-            string.Format(dbFileName, i));
+            string.Format(cDbFileName, i));
         try {
           File.WriteAllBytes(testDbFileN,
               Properties.Resources.test_kdbx);
@@ -193,7 +193,7 @@ namespace KeePassPluginTestUtil
         List<string> argList = new List<string>();
         if (numDbFiles > 0) {
           argList.Add(testDbFiles[0]);
-          argList.Add("-pw:" + password);
+          argList.Add("-pw:" + cPassword);
         };
         if (debug) {
           argList.Add("--debug");
@@ -204,16 +204,16 @@ namespace KeePassPluginTestUtil
 
         Thread keepassThread = new Thread((ThreadStart)delegate()
         {
-          this.KeePassIsRunning = true;
+          KeePassIsRunning = true;
           try {
-            int retVal = this.appDomain.ExecuteAssembly(
+            int retVal = mAppDomain.ExecuteAssembly(
                 Assembly.GetAssembly(typeof(KeePass.Program)).Location,
                 argList.ToArray());
           } finally {
-            this.KeePassIsRunning = false;
+            KeePassIsRunning = false;
           }
         });
-        keepassThread.Name = "KeePassThread" + threadNumber++;
+        keepassThread.Name = "KeePassThread" + mThreadNumber++;
         keepassThread.SetApartmentState(ApartmentState.STA);
         keepassThread.Start();
 
@@ -234,7 +234,7 @@ namespace KeePassPluginTestUtil
       /* wait for KeyPass to open */
       Stopwatch stopwatch = new Stopwatch();
       stopwatch.Start();
-      while ((stopwatch.ElapsedMilliseconds < keepassStartTimeout) &&
+      while ((stopwatch.ElapsedMilliseconds < cKeepassStartTimeout) &&
           (!KeePassIsInitalized)) {
         Thread.Sleep(250);
       }
@@ -243,7 +243,7 @@ namespace KeePassPluginTestUtil
       if (numDbFiles >= 1) {
         const string isOneFileOpenName = "KEEPASS_IS_ONE_FILE_OPEN";
         bool isOneFileOpen = false;
-        while ((stopwatch.ElapsedMilliseconds < keepassStartTimeout) &&
+        while ((stopwatch.ElapsedMilliseconds < cKeepassStartTimeout) &&
             !isOneFileOpen) {
           DoCallBack(delegate()
           {
@@ -277,8 +277,8 @@ namespace KeePassPluginTestUtil
           try {
             const string testDbPathKey = "TEST_DB_PATH";
             const string passwordKey = "PASSWORD";
-            appDomain.SetData(testDbPathKey, testDbFiles[i]);
-            appDomain.SetData(passwordKey, password);
+            mAppDomain.SetData(testDbPathKey, testDbFiles[i]);
+            mAppDomain.SetData(passwordKey, cPassword);
             DoCallBack(delegate()
             {
               IOConnectionInfo ioConnection = new IOConnectionInfo();
@@ -318,7 +318,7 @@ namespace KeePassPluginTestUtil
 
       SetData(plgxPathName, plgxPath);
 
-      this.appDomain.DoCallBack(delegate()
+      mAppDomain.DoCallBack(delegate()
       {
         string tdPlgxPath =
           (string)AppDomain.CurrentDomain.GetData(plgxPathName);
@@ -343,7 +343,7 @@ namespace KeePassPluginTestUtil
     /// <returns></returns>
     public object GetData(string name)
     {
-      return this.appDomain.GetData(name);
+      return mAppDomain.GetData(name);
     }
 
     /// <summary>
@@ -353,7 +353,7 @@ namespace KeePassPluginTestUtil
     /// <param name="data"></param>
     public void SetData(string name, object data)
     {
-      this.appDomain.SetData(name, data);
+      mAppDomain.SetData(name, data);
     }
 
     /// <summary>
@@ -362,7 +362,7 @@ namespace KeePassPluginTestUtil
     /// <param name="callBackDelegate">method to execute</param>
     public void DoCallBack(CrossAppDomainDelegate callBackDelegate)
     {
-      this.appDomain.DoCallBack(callBackDelegate);
+      mAppDomain.DoCallBack(callBackDelegate);
     }
   }
 }

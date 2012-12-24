@@ -80,20 +80,22 @@ namespace KeePassPluginTestUtil
     {
       if (mAppDomain != null && !mAppDomain.IsFinalizingForUnload()) {
         if (KeePassIsRunning) {
-          mAppDomain.DoCallBack(delegate()
-          {
-            if (KeePass.Program.MainForm == null) {
-              return;
-            }
-            KeePass.Program.MainForm.Invoke((MethodInvoker)delegate()
+          try {
+            mAppDomain.DoCallBack(delegate()
             {
-              ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program
-                .MainForm.MainMenu.Items["m_menuFile"];
-              ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu
-                .DropDownItems["m_menuFileExit"];
-              ExitMenuItem.PerformClick();
+              if (KeePass.Program.MainForm == null || KeePass.Program.MainForm.IsDisposed) {
+                return;
+              }
+              KeePass.Program.MainForm.Invoke((MethodInvoker)delegate()
+              {
+                ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program
+                  .MainForm.MainMenu.Items["m_menuFile"];
+                ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu
+                  .DropDownItems["m_menuFileExit"];
+                ExitMenuItem.PerformClick();
+              });
             });
-          });
+          } catch { }
           while (KeePassIsRunning) {
             Thread.Sleep(100);
             // TODO may want a timeout here

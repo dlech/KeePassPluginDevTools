@@ -83,11 +83,12 @@ namespace KeePassPluginTestUtil
           try {
             mAppDomain.DoCallBack(delegate()
             {
-              if (KeePass.Program.MainForm == null || KeePass.Program.MainForm.IsDisposed) {
-                return;
-              }
               KeePass.Program.MainForm.Invoke((MethodInvoker)delegate()
               {
+                if (KeePass.Program.MainForm == null || KeePass.Program.MainForm.IsDisposed)
+                {
+                  return;
+                }
                 ToolStripMenuItem FileMenu = (ToolStripMenuItem)KeePass.Program
                   .MainForm.MainMenu.Items["m_menuFile"];
                 ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu

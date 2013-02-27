@@ -83,7 +83,7 @@ namespace KeePassPluginTestUtil
           try {
             mAppDomain.DoCallBack(delegate()
             {
-              KeePass.Program.MainForm.Invoke((MethodInvoker)delegate()
+              var simulateFileExit = (MethodInvoker)delegate()
               {
                 if (KeePass.Program.MainForm == null || KeePass.Program.MainForm.IsDisposed)
                 {
@@ -94,7 +94,15 @@ namespace KeePassPluginTestUtil
                 ToolStripMenuItem ExitMenuItem = (ToolStripMenuItem)FileMenu
                   .DropDownItems["m_menuFileExit"];
                 ExitMenuItem.PerformClick();
-              });
+              };
+              if (KeePass.Program.MainForm.InvokeRequired)
+              {
+                KeePass.Program.MainForm.Invoke(simulateFileExit);
+              }
+              else
+              {
+                simulateFileExit.Invoke();
+              }
             });
           } catch { }
           while (KeePassIsRunning) {

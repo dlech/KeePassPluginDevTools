@@ -119,117 +119,135 @@ namespace KeePassPluginTestUtil
     /// configuration file to the working directory before starting 
     /// a new instance of KeePass</param>
     /// <returns>true if KeePass started successfully</returns>
-    public bool StartKeePass(bool exitAllFirst, bool debug, int numDbFiles,
+    public bool StartKeePass (bool exitAllFirst, bool debug, int numDbFiles,
         bool newConfig)
     {
       if (numDbFiles < 0) {
-        throw new ArgumentOutOfRangeException("numDbFiles");
+        throw new ArgumentOutOfRangeException ("numDbFiles");
       }
 
       if (KeePassIsInitalized) {
-        Debug.Fail("KeePass has already been started in this AppDomain. " +
-                    "KeePass can only be started once per AppDomain");
+        Debug.Fail ("KeePass has already been started in this AppDomain. " +
+          "KeePass can only be started once per AppDomain"
+        );
         return false;
       }
 
       if (exitAllFirst) {
-        KeePassControl.ExitAll();
+        KeePassControl.ExitAll ();
       }
 
       /* verify directories */
 
-      Assembly assembly = Assembly.GetAssembly(typeof(KeePass.Program));
-      string debugDir = Path.GetDirectoryName(assembly.Location);
+      Assembly assembly = Assembly.GetAssembly (typeof(KeePass.Program));
+      string debugDir = Path.GetDirectoryName (assembly.Location);
       // really shouldn't need to check this
-      if (!Directory.Exists(debugDir)) {
-        Debug.Fail("Debug directory '" + debugDir + "' does not exist. " +
-            "It should be the location of " + cKeepassExeName);
+      if (!Directory.Exists (debugDir)) {
+        Debug.Fail ("Debug directory '" + debugDir + "' does not exist. " +
+          "It should be the location of " + cKeepassExeName
+        );
         return false;
       }
 
       /* verify files */
 
-      string keepassExeFile = Path.Combine(debugDir, cKeepassExeName);
-      if (!File.Exists(keepassExeFile)) {
-        Debug.Fail("KeePass executable file '" + keepassExeFile +
-            "' does not exist. " +
-            "Please make sure it is set up in References and " +
-            "'Copy Local' property is set to true " +
-            "or fix 'keepassExe' in 'KeePassAppDomain.cs'");
+      string keepassExeFile = Path.Combine (debugDir, cKeepassExeName);
+      if (!File.Exists (keepassExeFile)) {
+        Debug.Fail ("KeePass executable file '" + keepassExeFile +
+          "' does not exist. " +
+          "Please make sure it is set up in References and " +
+          "'Copy Local' property is set to true " +
+          "or fix 'keepassExe' in 'KeePassAppDomain.cs'"
+        );
         return false;
       }
 
       /* copy files to working directory */
 
-      if (newConfig) {
-        string debugConfigFile = Path.Combine(debugDir, cConfigFileName);
+      string debugConfigFile = Path.Combine (debugDir, cConfigFileName);
+      if (newConfig || !File.Exists (debugConfigFile)) {
         try {
-          File.WriteAllText(debugConfigFile,
+          File.WriteAllText (debugConfigFile,
               Properties.Resources.KeePass_config_xml);
         } catch (Exception ex) {
-          Debug.Fail("Error writing config file '" + debugConfigFile +
-              "'.\n\n" + ex.Message);
+          Debug.Fail ("Error writing config file '" + debugConfigFile +
+            "'.\n\n" + ex.Message
+          );
           return false;
         }
       }
 
-      List<string> testDbFiles = new List<string>();
+      List<string> testDbFiles = new List<string> ();
       for (int i = 1; i <= numDbFiles; i++) {
-        string testDbFileN = Path.Combine(debugDir,
-            string.Format(cDbFileName, i));
+        string testDbFileN = Path.Combine (debugDir,
+            string.Format (cDbFileName, i));
         try {
-          File.WriteAllBytes(testDbFileN,
+          File.WriteAllBytes (testDbFileN,
               Properties.Resources.test_kdbx);
-          testDbFiles.Add(testDbFileN);
+          testDbFiles.Add (testDbFileN);
         } catch (Exception ex) {
-          KeePassControl.ShowErrorMessage(
+          KeePassControl.ShowErrorMessage (
               "Error writing database file '"
-              + testDbFileN + "'." +
-              "\n\n" + ex.Message);
+            + testDbFileN + "'." +
+            "\n\n" + ex.Message
+          );
           return false;
         }
       }
 
       /* start KeePass with test1.kdbx db */
       try {
-        List<string> argList = new List<string>();
+        List<string> argList = new List<string> ();
         if (numDbFiles > 0) {
-          argList.Add(testDbFiles[0]);
-          argList.Add("-pw:" + cPassword);
-        };
-        if (debug) {
-          argList.Add("--debug");
+          argList.Add (testDbFiles [0]);
+          argList.Add ("-pw:" + cPassword);
         }
-        argList.Add("--saveplgxcr");
+        ;
+        if (debug) {
+          argList.Add ("--debug");
+        }
+        argList.Add ("--saveplgxcr");
 
         /* start KeePass in a separate process and then attach to it. */
 
-        Thread keepassThread = new Thread((ThreadStart)delegate()
-        {
+        Thread keepassThread = new Thread ((ThreadStart)delegate() {
           KeePassIsRunning = true;
           try {
-            int retVal = mAppDomain.ExecuteAssembly(
-                Assembly.GetAssembly(typeof(KeePass.Program)).Location,
-                argList.ToArray());
+            int retVal = mAppDomain.ExecuteAssembly (
+                Assembly.GetAssembly (typeof(KeePass.Program)).Location,
+                argList.ToArray ());
+            Trace.WriteLine ("KeePass returned: " + retVal);
           } finally {
             KeePassIsRunning = false;
           }
-        });
+        }
+        );
         keepassThread.Name = "KeePassThread" + mThreadNumber++;
-        keepassThread.SetApartmentState(ApartmentState.STA);
-        keepassThread.Start();
+        keepassThread.SetApartmentState (ApartmentState.STA);
+        keepassThread.Start ();
 
-        DoCallBack(delegate()
-        {
-          while (KeePass.Program.MainForm == null ||
-              !KeePass.Program.MainForm.Visible) {
-            Thread.Sleep(250);
+        DoCallBack (delegate() {
+          var maxCount = 4;
+          var count = 0;
+          while (count < maxCount && (KeePass.Program.MainForm == null ||
+                                      !KeePass.Program.MainForm.Visible))
+          {
+            Thread.Sleep (250);
+            count++;
           }
-        });
+        }
+        );
       } catch (Exception ex) {
-        KeePassControl.ShowErrorMessage(
+        KeePassControl.ShowErrorMessage (
             "An exception occurred while starting KeePass" +
-            "\n\n" + ex.ToString());
+          "\n\n" + ex.ToString ()
+        );
+        return false;
+      }
+
+      if (!KeePassIsRunning) {
+        KeePassControl.ShowErrorMessage (
+                  "KeePass exited premeaturly");
         return false;
       }
 

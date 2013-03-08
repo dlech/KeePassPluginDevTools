@@ -256,7 +256,7 @@ namespace KeePassPluginTestUtil
 
       if (!KeePassIsRunning) {
         KeePassControl.ShowErrorMessage (
-                  "KeePass exited premeaturly");
+                  "KeePass exited prematurely");
         return false;
       }
 

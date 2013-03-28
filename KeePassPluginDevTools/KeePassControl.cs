@@ -33,7 +33,6 @@ namespace KeePassPluginTestUtil
     /// </summary>
     public static void ExitAll()
     {
-      /* vars */
       string[] args;
       Stopwatch stopwatch;
 
@@ -148,7 +147,6 @@ namespace KeePassPluginTestUtil
         throw new ArgumentOutOfRangeException("numDbFiles");
       }
 
-      /* vars */
       string assmDir;
       string configFile;
       List<string> testDbFiles;
@@ -159,7 +157,7 @@ namespace KeePassPluginTestUtil
       DialogResult result;
 
       if (exitAllFirst) {
-        ExitAll(); // close any open instances of keepass
+        ExitAll(); // close any open instances of KeePass
       }
 
       /* verify directories */
@@ -211,7 +209,7 @@ namespace KeePassPluginTestUtil
         }
       }
 
-      /* start keepass with test1.kdbx db */
+      /* start KeePass with test1.kdbx db */
       try {
         args = new string[] { 
                     testDbFiles[0],
@@ -282,7 +280,7 @@ namespace KeePassPluginTestUtil
             InvokeMainWindow(methodInvoker);
           } catch (Exception ex) {
             ShowErrorMessage(
-              "An exception occured while opening additional database file" +
+              "An exception occurred while opening additional database file" +
               "\n\n" + ex.Message);
             return null;
           }
@@ -354,7 +352,7 @@ namespace KeePassPluginTestUtil
       InvokeMainWindow(methodInvoker);
     }
 
-    /* convience methods */
+    /* convince methods */
 
     /// <summary>
     /// Helper method for showing Error MessageBox with OK button
@@ -386,7 +384,7 @@ namespace KeePassPluginTestUtil
     }
 
     /// <summary>
-    /// Starts keypass in a separate process
+    /// Starts KeePass in a separate process
     /// </summary>
     /// <param name="args">argument to pass</param>
     /// <returns>the process that was started</returns>

@@ -1,0 +1,9 @@
+*.cs      text diff=csharp
+*.csproj  text
+*.sln     text
+*.xml     text
+*.txt     text
+*.md      text
+*.git*    text
+
+*.kdbx    binary

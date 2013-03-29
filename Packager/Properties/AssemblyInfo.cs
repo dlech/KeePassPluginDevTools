@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("KeePassPluginTestUtil")]
-[assembly: AssemblyDescription("Helper library for unit testing KeePass 2.x plugins")]
+[assembly: AssemblyTitle("KeePass Plugin Packager")]
+[assembly: AssemblyDescription("Creates packages for distributing KeePass Plugin")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("dlech")]
-[assembly: AssemblyProduct("KeePassPluginTestUtil")]
-[assembly: AssemblyCopyright("Copyright ©  2012")]
+[assembly: AssemblyCompany("David Lechner")]
+[assembly: AssemblyProduct("KeePass Plugin Packager")]
+[assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("75ebda85-fd53-4392-99ef-c9eb00e71047")]
+[assembly: Guid("C53F00B9-3A90-4968-9518-473E505B68B4")]
 
 // Version information for an assembly consists of the following four values:
 //

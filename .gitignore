@@ -29,4 +29,5 @@ _ReSharper*/
 [Tt]est[Rr]esult*
 
 *.resources
-
+*.userprefs
+*.il

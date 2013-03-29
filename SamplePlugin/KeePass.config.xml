@@ -7,11 +7,11 @@
   </Meta>
   <!-- Use all defaults with a few exceptions -->
   <!-- Other options can be configured per test using KeePass.Program.Config object -->
-  <Application>	
+  <Application>
     <Start>
       <!-- Don't try to do anything on startup -->
-      <OpenLastFile>false</OpenLastFile> 
-      <CheckForUpdate>false</CheckForUpdate> 
+      <OpenLastFile>false</OpenLastFile>
+      <CheckForUpdate>false</CheckForUpdate>
       <CheckForUpdateConfigured>true</CheckForUpdateConfigured>
     </Start>
   </Application>

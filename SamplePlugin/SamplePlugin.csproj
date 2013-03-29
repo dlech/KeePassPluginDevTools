@@ -21,6 +21,11 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Execute" command="bin/Debug/KeePass.exe --debug --pw:sample bin/Debug/Databases/Sample.kdbx" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,6 +34,11 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Execute" command="bin/Release/KeePass.exe --pw:sample bin/Release/Databases/Sample.kdbx" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleasePlgx|AnyCPU'">
     <OutputPath>bin\ReleasePlgx\</OutputPath>
@@ -40,6 +50,16 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <WarningLevel>4</WarningLevel>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="AfterBuild" command="rm &quot;${TargetFile}&quot;" />
+        <Command type="AfterBuild" command="rsync --recursive --delete-excluded ${ProjectDir}/ /tmp/${ProjectName}/ --exclude=Databases/ --exclude=*.config --exclude=*.xml --exclude=bin --exclude=*.il" />
+        <Command type="AfterBuild" command="bin/ReleasePlgx/KeePass.exe --plgx-create /tmp/${ProjectName}" />
+        <Command type="AfterBuild" command="mv /tmp/${ProjectName}.plgx ${TargetDir}" />
+        <Command type="AfterBuild" command="rm -rf /tmp/${ProjectName}/" />
+        <Command type="Execute" command="bin/ReleasePlgx/KeePass.exe --pw:sample bin/ReleasePlgx/Databases/Sample.kdbx" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -61,14 +81,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="keepass.config.xml">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="KeePass.exe.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Databases\Sample.kdbx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="KeePass.config.xml">
+      <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

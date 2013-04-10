@@ -1,113 +1,116 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<xs:schema
-xmlns:xs="http://www.w3.org/2001/XMLSchema"
-xmlns:msb="http://schemas.microsoft.com/developer/msbuild/2003"
-elementFormDefault="qualified">
-
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+ xmlns:msb="http://schemas.microsoft.com/developer/msbuild/2003"
+  elementFormDefault="qualified">
   <xs:element name="PlgxConfiguration" substitutionGroup="msb:Property">
-    <xs:element name="Prerequisites" minOccurs="0">
-      <xs:complexType>
-        <xs:sequence minOccurs="1" maxOccurs="1">
-          <xs:element name="KeePassVersion" minOccurs="0">
-            <xs:simpleType>
-              <xs:restriction base ="xs:string">
-                <xs:enumeration value ="2.09" />
-                <xs:enumeration value ="2.10" />
-                <xs:enumeration value ="2.11" />
-                <xs:enumeration value ="2.12" />
-                <xs:enumeration value ="2.13" />
-                <xs:enumeration value ="2.14" />
-                <xs:enumeration value ="2.15" />
-                <xs:enumeration value ="2.16" />
-                <xs:enumeration value ="2.17" />
-                <xs:enumeration value ="2.18" />
-                <xs:enumeration value ="2.19" />
-                <xs:enumeration value ="2.20" />
-                <xs:enumeration value ="2.20.1" />
-                <xs:enumeration value ="2.21" />
-              </xs:restriction>
-            </xs:simpleType>
-          </xs:element>
-          <xs:element name="DotNetVersion" minOccurs="0">
-            <xs:simpleType>
-              <xs:restriction base ="xs:string">
-                <xs:enumeration value ="2.0" />
-                <xs:enumeration value ="3.0" />
-                <xs:enumeration value ="3.5" />
-                <xs:enumeration value ="4.0" />
-                <xs:enumeration value ="4.5" />
-              </xs:restriction>
-            </xs:simpleType>
-          </xs:element>
-          <xs:element name="OS" minOccurs="0">
-            <xs:simpleType>
-              <xs:restriction base ="xs:string">
-                <xs:enumeration value ="Windows" />
-                <xs:enumeration value ="Unix" />
-              </xs:restriction>
-            </xs:simpleType>
-          </xs:element>
-          <xs:element name="PointerSize" minOccurs="0">
-            <xs:simpleType>
-              <xs:restriction base ="xs:positiveInteger">
-                <xs:enumeration value ="4" />
-                <xs:enumeration value ="8" />
-              </xs:restriction>
-            </xs:simpleType>
-          </xs:element>
-        </xs:sequence>
-      </xs:complexType>
-    </xs:element>
-    <xs:element name="BuildCommands">
-      <xs:complexType>
-        <xs:sequence>
-          <xs:element name="PreBuild" type="xs:string"  minOccurs="0" />
-          <xs:element name="PostBuild" type="xs:string"  minOccurs="0" />
-        </xs:sequence>
-      </xs:complexType>
-    </xs:element>
-    <xs:element name="IncludeFiles">
-      <xs:simpleType>
-        <xs:list itemType ="xs:string" />
-      </xs:simpleType>
-    </xs:element>
-    <xs:element name="ExcludeFiles">
-      <xs:simpleType>
-        <xs:list itemType ="xs:string" />
-      </xs:simpleType>
-    </xs:element>
-    <xs:element name ="PackageOutput">
-      <xs:complexType>
-        <xs:sequence>
-          <xs:element name ="zip" minOccurs ="0">
-            <xs:complexType />
-          </xs:element>
-          <xs:element name ="deb" minOccurs ="0">
-            <xs:complexType>
-              <xs:attribute name ="PackageRevision" type ="xs:positiveInteger"  default="1"/>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name ="rpm" minOccurs ="0">
-            <xs:complexType>
-              <xs:attribute name ="PackageRevision" type ="xs:positiveInteger" default="1" />
-            </xs:complexType>
-          </xs:element>
-          <xs:element name ="msi" minOccurs ="0">
-            <xs:complexType />
-          </xs:element>
-        </xs:sequence>
-        <xs:attribute name ="PackageName" type="xs:string" use="required" />
-        <xs:attribute name ="VersionSegments" default="3">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Prerequisites" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence minOccurs="1" maxOccurs="1">
+              <xs:element name="KeePassVersion" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="2.09" />
+                    <xs:enumeration value="2.10" />
+                    <xs:enumeration value="2.11" />
+                    <xs:enumeration value="2.12" />
+                    <xs:enumeration value="2.13" />
+                    <xs:enumeration value="2.14" />
+                    <xs:enumeration value="2.15" />
+                    <xs:enumeration value="2.16" />
+                    <xs:enumeration value="2.17" />
+                    <xs:enumeration value="2.18" />
+                    <xs:enumeration value="2.19" />
+                    <xs:enumeration value="2.20" />
+                    <xs:enumeration value="2.20.1" />
+                    <xs:enumeration value="2.21" />
+                    <xs:enumeration value="2.22" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="DotNetVersion" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="2.0" />
+                    <xs:enumeration value="3.0" />
+                    <xs:enumeration value="3.5" />
+                    <xs:enumeration value="4.0" />
+                    <xs:enumeration value="4.5" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="OS" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="Windows" />
+                    <xs:enumeration value="Unix" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="PointerSize" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:positiveInteger">
+                    <xs:enumeration value="4" />
+                    <xs:enumeration value="8" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="BuildCommands" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="PreBuild" type="xs:string" minOccurs="0" />
+              <xs:element name="PostBuild" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="IncludeFiles" minOccurs="0">
           <xs:simpleType>
-            <xs:restriction base ="xs:positiveInteger">
-              <xs:enumeration value ="2" />
-              <xs:enumeration value ="3" />
-              <xs:enumeration value ="4" />
-            </xs:restriction>
+            <xs:list itemType="xs:string" />
           </xs:simpleType>
-        </xs:attribute>
-        <xs:attribute name="DestinationPath" type="xs:string" use="required" />
-      </xs:complexType>
-    </xs:element>
+        </xs:element>
+        <xs:element name="ExcludeFiles" minOccurs="0">
+          <xs:simpleType>
+            <xs:list itemType="xs:string" />
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="PackageOutput" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="zip" minOccurs="0">
+                <xs:complexType />
+              </xs:element>
+              <xs:element name="deb" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="PackageRevision" type="xs:positiveInteger" default="1" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="rpm" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="PackageRevision" type="xs:positiveInteger" default="1" />
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="msi" minOccurs="0">
+                <xs:complexType />
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="PackageName" type="xs:string" use="required" />
+            <xs:attribute name="VersionSegments" default="3">
+              <xs:simpleType>
+                <xs:restriction base="xs:positiveInteger">
+                  <xs:enumeration value="2" />
+                  <xs:enumeration value="3" />
+                  <xs:enumeration value="4" />
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="DestinationPath" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
   </xs:element>
 </xs:schema>

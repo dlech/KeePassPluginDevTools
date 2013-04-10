@@ -3,8 +3,9 @@ using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Linq;
 using System.IO;
+using System.Xml.Serialization;
 
-namespace PlgxBuilder
+namespace KeePassPluginDevTools.PlgxBuilder
 {
   public class Program
   {    
@@ -14,8 +15,16 @@ namespace PlgxBuilder
       "Expected single argument containing build configuration xml";
 
     public static int Main(string[] args)
-    {
-
+    {     
+      args = new string[]{ @"<?xml version=""1.0"" encoding=""utf-8""?>
+<PlgxConfiguration>
+  <Prerequisites>
+    <KeePassVersion>2.22</KeePassVersion>
+    <DotNetVersion>4.0</DotNetVersion>
+    <OS>Unix</OS>
+    <PointerSize>4</PointerSize>
+  </Prerequisites>
+</PlgxConfiguration>" };
 
       if (args.Length != 1) {
         Console.WriteLine (argError);
@@ -42,19 +51,22 @@ namespace PlgxBuilder
           }
         };
 
-        var document = new XmlDocument();
-        document.Load(xsdFile);
-        XmlReader rdr = XmlReader.Create(new StringReader(document.InnerXml), readerSettings);
-        
-        while (rdr.Read()) { }
+        XmlReader reader = XmlReader.Create(new StringReader(args[0]), readerSettings);
+        var serializer = new XmlSerializer(typeof(PlgxConfiguration));
+        var config = serializer.Deserialize (reader) as PlgxConfiguration;
 
         if (!isValid) {
           return 1;
         }
 
-      } catch (XmlException xmlEx) {
-        Console.WriteLine (argError);
-        Console.WriteLine (xmlEx.Message);
+        Console.WriteLine ("--Prerequisites--");
+        Console.WriteLine ("KeePass Version: {0}", config.Prerequisites.KeePassVersion);
+        Console.WriteLine (".NET Version: {0}", config.Prerequisites.DotNetVersion);
+        Console.WriteLine ("OS Version: {0}", config.Prerequisites.OS);
+        Console.WriteLine ("Pointer Size: {0}", config.Prerequisites.PointerSize);
+
+      } catch (Exception ex) {
+        Console.WriteLine (ex.Message);
         return 1;
       }
 

@@ -9,6 +9,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>KeePassPluginDevTools.PlgxBuilder</RootNamespace>
     <AssemblyName>PlgxBuilder</AssemblyName>
+    <StartupObject>KeePassPluginDevTools.PlgxBuilder.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -33,6 +34,7 @@
     <None Include="Plgx.targets" />
     <None Include="Microsoft.Build.Plgx.xsd">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -53,4 +55,14 @@
       <Name>KeePassControl</Name>
     </ProjectReference>
   </ItemGroup>
+  <Target Name="BeforeBuild">
+    <Exec Command="xsd Microsoft.Build.Plgx.xsd /c /n:KeePassPluginDevTools.PlgxBuilder" />
+  </Target>
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Deployment.LinuxDeployData scriptName="build-plgx" />
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>

@@ -4,6 +4,6 @@
   xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
   
   <Target Name="BuildPlgx">    
-	<Exec Command="notify-send '$(PlgxConfiguration)'" Condition=" '$(OS)' != 'Windows_NT' "></Exec>
+	  <Exec Command="notify-send '$(PlgxConfiguration)'" Condition=" '$(OS)' != 'Windows_NT' "></Exec>
   </Target>
 </Project>

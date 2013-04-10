@@ -73,14 +73,11 @@ namespace PlgxInspector
       plgx.Version = br.ReadUInt32();
       
       if ((uSig1 != PlgxSignature1) || (uSig2 != PlgxSignature2))
-        throw new Exception ("Invalid signature");
+        throw new Exception ("Invalid signature at start of file");
       if((plgx.Version & PlgxVersionMask) > (PlgxVersion & PlgxVersionMask))
         throw new PlgxException(KLRes.FileVersionUnsupported);
-      
-      string strPluginPath = null;
-      string strTmpRoot = null;
+
       bool? bContent = null;
-      string strBuildPre = null, strBuildPost = null;
       
       while(true)
       {
@@ -202,7 +199,7 @@ namespace PlgxInspector
 
     private static void PrintData(PlgxInfo plgx)
     {
-      Console.WriteLine (".plgx File Version:           {0}", plgx.Version >> 16);
+      Console.WriteLine ("File Format Version:          {0}", plgx.Version >> 16);
       Console.WriteLine ("UUID:                         {0}", plgx.FileUuid.ToHexString ());
       Console.WriteLine ("Base File Name:               {0}", plgx.BaseFileName);
       Console.WriteLine ("Creation Time:                {0}", plgx.CreationTime);

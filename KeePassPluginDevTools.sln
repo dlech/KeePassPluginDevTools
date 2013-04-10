@@ -5,9 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeePassControl", "KeePassCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeePass", "keepass2\KeePass\KeePass.csproj", "{10938016-DEE2-4A25-9A5A-8FD3444379CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Packager", "Packager\Packager.csproj", "{D226AF31-426D-4599-A72A-513EC82386A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipPackager", "Packager\ZipPackager.csproj", "{D226AF31-426D-4599-A72A-513EC82386A8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamplePlugin", "SamplePlugin\SamplePlugin.csproj", "{4B5B8E16-3542-4997-8BF3-2DFFF5E9F1C2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlgxBuilder", "PlgxBuilder\PlgxBuilder.csproj", "{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlgxInspector", "PlgxInspector\PlgxInspector.csproj", "{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +77,24 @@ Global
 		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|x64.ActiveCfg = ReleasePlgx|x64
 		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|x64.Build.0 = ReleasePlgx|x64
 		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|x86.ActiveCfg = ReleasePlgx|x64
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Debug|x64.Build.0 = Debug|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Debug|x86.Build.0 = Debug|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Release|x64.ActiveCfg = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Release|x64.Build.0 = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Release|x86.ActiveCfg = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.Release|x86.Build.0 = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.ReleasePlgx|Any CPU.ActiveCfg = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.ReleasePlgx|Any CPU.Build.0 = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.ReleasePlgx|x64.ActiveCfg = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.ReleasePlgx|x64.Build.0 = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.ReleasePlgx|x86.ActiveCfg = Release|Any CPU
+		{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}.ReleasePlgx|x86.Build.0 = Release|Any CPU
 		{D226AF31-426D-4599-A72A-513EC82386A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D226AF31-426D-4599-A72A-513EC82386A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D226AF31-426D-4599-A72A-513EC82386A8}.Debug|x64.ActiveCfg = Debug|x64
@@ -91,9 +113,27 @@ Global
 		{D226AF31-426D-4599-A72A-513EC82386A8}.ReleasePlgx|x64.Build.0 = ReleasePlgx|x64
 		{D226AF31-426D-4599-A72A-513EC82386A8}.ReleasePlgx|x86.ActiveCfg = ReleasePlgx|x86
 		{D226AF31-426D-4599-A72A-513EC82386A8}.ReleasePlgx|x86.Build.0 = ReleasePlgx|x86
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Debug|x64.Build.0 = Debug|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Debug|x86.Build.0 = Debug|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Release|x64.ActiveCfg = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Release|x64.Build.0 = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Release|x86.ActiveCfg = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.Release|x86.Build.0 = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.ReleasePlgx|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.ReleasePlgx|Any CPU.Build.0 = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.ReleasePlgx|x64.ActiveCfg = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.ReleasePlgx|x64.Build.0 = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.ReleasePlgx|x86.ActiveCfg = Release|Any CPU
+		{E7F9598B-FBDE-4407-A7EA-3BD4FFE6B010}.ReleasePlgx|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = SamplePlugin\SamplePlugin.csproj
+		StartupItem = PlgxInspector\PlgxInspector.csproj
 		Policies = $0
 		$0.DotNetNamingPolicy = $1
 		$1.DirectoryNamespaceAssociation = None

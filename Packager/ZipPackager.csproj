@@ -8,7 +8,7 @@
     <ProjectGuid>{D226AF31-426D-4599-A72A-513EC82386A8}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KeePassPluginDevTools.Packager</RootNamespace>
+    <RootNamespace>KeePassPluginDevTools.ZipPackager</RootNamespace>
     <AssemblyName>Packager</AssemblyName>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -123,19 +123,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PlgxPackager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Microsoft.Build.Plgx.cs">
-      <DependentUpon>Microsoft.Build.Plgx.xsd</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Microsoft.Build.Plgx.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Plgx.targets" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\keepass2\KeePass\KeePass.csproj">

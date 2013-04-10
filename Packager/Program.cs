@@ -7,7 +7,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using System.Runtime.InteropServices;
 using System.Reflection;
 
-namespace KeePassPluginDevTools.Packager
+namespace KeePassPluginDevTools.ZipPackager
 {
   public class Program
   {

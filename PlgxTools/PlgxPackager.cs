@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Threading;
 using KeePassPluginDevTools.Control;
 
-namespace KeePassPluginDevTools.PlgxBuilder
+namespace KeePassPluginDevTools.PlgxTools
 {
   public class PlgxPackager
  {

@@ -8,7 +8,7 @@
     <ProjectGuid>{B120F5D7-59B5-4376-AC0A-FF60A361D5B2}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>KeePassPluginDevTools.PlgxTools</RootNamespace>
-    <AssemblyName>PlgxInspector</AssemblyName>
+    <AssemblyName>PlgxTool</AssemblyName>
     <Description>Tools for creating and inspecting KeePass 2.x Plugin (.plgx) files</Description>
     <StartupObject>KeePassPluginDevTools.PlgxTools.Program</StartupObject>
   </PropertyGroup>
@@ -21,7 +21,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
-    <Commandlineparameters>--list "/tmp/KeeAgent.plgx"</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -50,6 +49,7 @@
     <Compile Include="PlgxPackager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="NDesk.Options\Options.cs" />
+    <Compile Include="Microsoft.Build.Plgx_xsd.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -71,7 +71,7 @@
     <None Include="Plgx.targets" />
   </ItemGroup>
   <Target Name="BeforeBuild">
-    <Exec Command="xsd Microsoft.Build.Plgx.xsd /c /n:KeePassPluginDevTools.PlgxBuilder" />
+    <Exec Command="xsd Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
   </Target>
   <ItemGroup>
     <Folder Include="NDesk.Options\" />

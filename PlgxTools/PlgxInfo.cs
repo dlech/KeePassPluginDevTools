@@ -19,10 +19,11 @@ namespace KeePassPluginDevTools.PlgxTools
     /// The plgx file extension.
     /// </summary>
     public const string PlgxExtension = "plgx";
+    public const string none = "<none>";
     
     private const uint PlgxSignature1 = 0x65D90719;
     private const uint PlgxSignature2 = 0x3DDD0503;
-    private const uint PlgxVersion = 0x00010000;
+    public const uint PlgxVersion1 = 0x00010000;
     private const uint PlgxVersionMask = 0xFFFF0000;
     
     private const ushort PlgxEOF = 0;
@@ -78,12 +79,12 @@ namespace KeePassPluginDevTools.PlgxTools
     /// <summary>
     /// Gets or sets the prerequsite KeePass version required
     /// </summary>
-    public ulong PrereqKP { get; set; }
+    public ulong? PrereqKP { get; set; }
 
     /// <summary>
     /// Gets or sets the prerequsite .NET version.
     /// </summary>
-    public ulong PrereqNet { get; set; }
+    public ulong? PrereqNet { get; set; }
 
     /// <summary>
     /// Gets or sets the prerequsite operating system
@@ -93,7 +94,7 @@ namespace KeePassPluginDevTools.PlgxTools
     /// <summary>
     /// Gets or sets the prerequsite pointer size
     /// </summary>
-    public uint PrereqPtr { get; set; }
+    public uint? PrereqPtr { get; set; }
 
     /// <summary>
     /// Gets or sets the pre-build command
@@ -137,33 +138,32 @@ namespace KeePassPluginDevTools.PlgxTools
       
       writer.Write(PlgxSignature1);
       writer.Write(PlgxSignature2);
-      writer.Write(PlgxVersion);
-      WriteObject(writer, PlgxFileUuid, (new PwUuid(true)).UuidBytes);
+      writer.Write(Version);
+      WriteObject(writer, PlgxFileUuid, FileUuid.UuidBytes);
       WriteObject(writer, PlgxBaseFileName, StrUtil.Utf8.GetBytes(
         BaseFileName));
       WriteObject(writer, PlgxCreationTime, StrUtil.Utf8.GetBytes(
-        TimeUtil.SerializeUtc(DateTime.Now)));
+        CreationTime));
       WriteObject(writer, PlgxGeneratorName, StrUtil.Utf8.GetBytes(
-        Assembly.GetAssembly (this.GetType ()).GetName ().Name));
+        GeneratorName));
       WriteObject(writer, PlgxGeneratorVersion, MemUtil.UInt64ToBytes(
-        PwDefs.FileVersion64));
+        GeneratorVersion));
            
-      if (PrereqKP != 0) {
-        WriteObject (writer, PlgxPrereqKP, MemUtil.UInt64ToBytes (PrereqKP));
+      if (PrereqKP.HasValue) {
+        WriteObject (writer, PlgxPrereqKP, MemUtil.UInt64ToBytes (PrereqKP.Value));
       }
 
-
-      if(PrereqNet != 0) {
-        WriteObject(writer, PlgxPrereqNet, MemUtil.UInt64ToBytes(PrereqNet));
+      if(PrereqNet.HasValue) {
+        WriteObject(writer, PlgxPrereqNet, MemUtil.UInt64ToBytes(PrereqNet.Value));
       }
 
       if (!string.IsNullOrEmpty (PrereqOS)) {
         WriteObject (writer, PlgxPrereqOS, StrUtil.Utf8.GetBytes (PrereqOS));
       }
 
-      if(PrereqPtr != 0)
+      if(PrereqPtr.HasValue)
       {
-        WriteObject(writer, PlgxPrereqPtr, MemUtil.UInt32ToBytes(PrereqPtr));
+        WriteObject(writer, PlgxPrereqPtr, MemUtil.UInt32ToBytes(PrereqPtr.Value));
       }
 
       if (!string.IsNullOrEmpty (BuildPre)) {
@@ -261,7 +261,7 @@ namespace KeePassPluginDevTools.PlgxTools
       
       if ((signature1 != PlgxSignature1) || (signature2 != PlgxSignature2))
         throw new PlgxException ("Invalid signature at start of file");
-      if((plgx.Version & PlgxVersionMask) > (PlgxVersion & PlgxVersionMask))
+      if((plgx.Version & PlgxVersionMask) > (PlgxVersion1 & PlgxVersionMask))
         throw new PlgxException(KLRes.FileVersionUnsupported);
       
       bool? content = null;
@@ -410,18 +410,24 @@ namespace KeePassPluginDevTools.PlgxTools
       builder.AppendFormat ("Creation Time:                {0}\n", CreationTime);
       builder.AppendFormat ("Generator Name:               {0}\n", GeneratorName);
       builder.AppendFormat ("Generator Version:            {0}\n",
-                         StrUtil.VersionToString (GeneratorVersion));
+                            StrUtil.VersionToString (GeneratorVersion));
       builder.AppendFormat ("Prerequsite KeePass Version:  {0}\n",
-                         StrUtil.VersionToString (PrereqKP));
+                            PrereqKP.HasValue ?
+                            StrUtil.VersionToString (PrereqKP.Value) : none);
       builder.AppendFormat ("Prerequsite .NET Version:     {0}\n",
-                         StrUtil.VersionToString (PrereqNet));
-      builder.AppendFormat ("Prerequsite Operating System: {0}\n", PrereqOS);
-      builder.AppendFormat ("Prerequsite Pointer size:     {0}\n", PrereqPtr);
-      builder.Append ("Pre-build Command:\n");
-      builder.Append (BuildPre + '\n');
-      builder.Append ("Post-build Command:\n");
-      builder.Append (BuildPost + '\n');
-      builder.Append ("Files:\n");
+                            PrereqNet.HasValue ? 
+                            StrUtil.VersionToString (PrereqNet.Value) : none);
+      builder.AppendFormat ("Prerequsite Operating System: {0}\n",
+                            PrereqOS != null ? PrereqOS : none);
+      builder.AppendFormat ("Prerequsite Pointer size:     {0}\n",
+                            PrereqPtr.HasValue ? PrereqPtr.Value.ToString () : none);
+      builder.AppendLine ();
+      builder.AppendLine ("Pre-build Command:");
+      builder.AppendLine (BuildPre != null ? BuildPre : none);
+      builder.AppendLine ("Post-build Command:");
+      builder.AppendLine (BuildPost != null ? BuildPost : none);
+      builder.AppendLine ();
+      builder.AppendLine ("Files:");
       foreach (var file in Files) {
         // TODO - make bytes more readable with k or M
         builder.AppendFormat ("{0} ({1} bytes)\n", file.Key, file.Value.Length);

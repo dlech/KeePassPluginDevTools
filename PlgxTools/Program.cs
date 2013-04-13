@@ -8,6 +8,7 @@ using NDesk.Options;
 using KeePassLib.Utility;
 using KeePassLib;
 using System.Reflection;
+using System.Collections.Generic;
 
 [assembly:AssemblyVersion("0.1.0.*")]
 [assembly:AssemblyFileVersion("0.1.0.0")]
@@ -34,7 +35,7 @@ namespace KeePassPluginDevTools.PlgxTools
     {
 #if DEBUG
       // set args here for debugging
-      args = new[] { "--build", "a", "-c=test.xml" };
+      args = new[] { "--build", "../../../SamplePlugin/", "-c=test.xml" };
 #endif
       var selectedCommand = new Command ();
       string input = null;
@@ -78,8 +79,11 @@ namespace KeePassPluginDevTools.PlgxTools
         }
 
         if (selectedCommand == Command.Build && input != null && output == null) {
-          output = Path.Combine (input, "..");
+          output = Path.Combine (input, "..") + Path.PathSeparator;
         }
+        input = Path.GetFullPath (input);
+        output = Path.GetFullPath (output);
+        config = Path.GetFullPath (config);
 #if DEBUG
         Console.WriteLine ("input:  " + input);
         Console.WriteLine ("output: " + output);
@@ -104,23 +108,7 @@ namespace KeePassPluginDevTools.PlgxTools
 
       switch (selectedCommand) {
         #region Build Command
-      case Command.Build:
-
-        args = new string[]{ @"<?xml version=""1.0"" encoding=""utf-8""?>
-<PlgxConfiguration>
-  <Prerequisites>
-    <KeePassVersion>2.22</KeePassVersion>
-    <DotNetVersion>4.0</DotNetVersion>
-    <OS>Unix</OS>
-    <PointerSize>4</PointerSize>
-  </Prerequisites>
-</PlgxConfiguration>" };
-
-        if (args.Length != 1) {
-          Console.WriteLine (argError);
-          return 1;
-        }
-
+      case Command.Build:       
         try {
           var plgx = new PlgxInfo ();
           plgx.Version = PlgxInfo.PlgxVersion1;
@@ -158,57 +146,41 @@ namespace KeePassPluginDevTools.PlgxTools
                   plgx.BuildPost = plgxConfig.BuildCommands.PostBuild;
                 }
               }
-              #if DEBUG
-              Console.WriteLine ("--Generator--");
-              Console.WriteLine ("Version: 0x{0:X8}", plgx.Version);
-              Console.WriteLine ("FileUuid: {0}", plgx.FileUuid.ToHexString ());
-              Console.WriteLine ("BaseFileName: {0}", plgx.BaseFileName);
-              Console.WriteLine ("CreationTime: {0}", plgx.CreationTime);
-              Console.WriteLine ("GeneratorName: {0}", plgx.GeneratorName);
-              Console.WriteLine ("GeneratorVersion: 0x{0:X16} ({1})",
-                                 plgx.GeneratorVersion, 
-                                 StrUtil.VersionToString (plgx.GeneratorVersion));
-              Console.WriteLine ("--Prerequisites--");
-              Console.WriteLine ("KeePass Version: {0}",
-                                 plgxConfig.Prerequisites == null || 
-                                 plgxConfig.Prerequisites.KeePassVersion == null ?
-                                 PlgxInfo.none : 
-                                 string.Format ("{0} (0x{1:X16})",
-                             plgxConfig.Prerequisites.KeePassVersion,
-                             plgx.PrereqKP));
-              Console.WriteLine (".NET Version: {0}",
-                                 plgxConfig.Prerequisites == null || 
-                                 plgxConfig.Prerequisites.DotNetVersion == null ?
-                                 PlgxInfo.none :
-                                 string.Format ("{0} (0x{1:X16})",
-                             plgxConfig.Prerequisites.DotNetVersion,
-                             plgx.PrereqNet));
-              Console.WriteLine ("OS Version: {0}",
-                                 plgxConfig.Prerequisites == null || 
-                                 !plgxConfig.Prerequisites.OSSpecified ?
-                                 PlgxInfo.none :
-                                 string.Format ("{0} ({1})",
-                                 plgxConfig.Prerequisites.OS.GetValue (),
-                                 plgx.PrereqOS));
-              Console.WriteLine ("Pointer Size: {0}",
-                                 plgxConfig.Prerequisites == null || 
-                                 !plgxConfig.Prerequisites.PointerSizeSpecified ?
-                                 PlgxInfo.none :
-                                 string.Format ("{0} ({1})",
-                                 plgxConfig.Prerequisites.PointerSize.GetValue (),
-                                 plgx.PrereqPtr));              
-              Console.WriteLine ("--Build Commands--");
-              Console.WriteLine ("Pre-build:");
-              Console.WriteLine (plgxConfig.BuildCommands == null || 
-                                 plgxConfig.BuildCommands.PreBuild == null ?
-                                 PlgxInfo.none : plgx.BuildPre);              
-              Console.WriteLine ("Post-build:");
-              Console.WriteLine (plgxConfig.BuildCommands == null || 
-                                 plgxConfig.BuildCommands.PostBuild == null ?
-                                 PlgxInfo.none : plgx.BuildPost);
-              #endif
+            }           
+          }
+
+          var projectFiles = Directory.GetFiles (input, "*.csproj");
+          if (projectFiles.Length != 1) {
+            Console.WriteLine ("Source directory must contain one and only on .csproj file");
+            return 1;
+          }
+          var project = new XmlDocument();
+          project.Load (projectFiles[0]);
+
+          foreach (XmlNode assemblyName in project.GetElementsByTagName ("AssemblyName"))
+          {
+            plgx.BaseFileName = assemblyName.InnerText;
+          }
+
+          foreach (XmlNode compileElement in project.GetElementsByTagName ("Compile"))
+          {
+            var includeFile = compileElement.Attributes["Include"];
+            if (!string.IsNullOrWhiteSpace (includeFile.Value)) {
+              plgx.Files.Add (includeFile.Value, new byte[0]);
             }
           }
+          foreach (XmlNode compileElement in project.GetElementsByTagName ("None"))
+          {
+            var includeFile = compileElement.Attributes["Include"];
+            if (!string.IsNullOrWhiteSpace (includeFile.Value)) {
+              plgx.Files.Add (includeFile.Value, new byte[0]);
+            }
+          }
+          // TODO - copy required references (dlls)
+
+          #if DEBUG
+          Console.WriteLine (plgx.ToString (true));
+          #endif
         } catch (Exception ex) {
           Console.WriteLine (ex.Message);
           return 1;

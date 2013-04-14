@@ -161,23 +161,61 @@ namespace KeePassPluginDevTools.PlgxTools
           {
             plgx.BaseFileName = assemblyName.InnerText;
           }
-
-          foreach (XmlNode compileElement in project.GetElementsByTagName ("Compile"))
+          foreach (XmlNode itemGroup in project.GetElementsByTagName ("ItemGroup"))
           {
-            var includeFile = compileElement.Attributes["Include"];
-            if (!string.IsNullOrWhiteSpace (includeFile.Value)) {
-              plgx.Files.Add (includeFile.Value, new byte[0]);
+            // make copy of nodes so that we can delete them if needed
+            var children = new List<XmlNode>();
+            foreach (XmlNode child in itemGroup.ChildNodes) 
+            {
+              children.Add (child);
+            }
+            foreach (XmlNode child in children)
+            {
+              if (child.LocalName == "Reference") {
+                foreach(XmlNode childMetadata in child.ChildNodes)
+                {
+                  if (childMetadata.Name == "HintPath") {
+                    var assemblyPath = Path.GetFullPath (
+                      Path.Combine (input, UrlUtil.ConvertSeparators(childMetadata.InnerText)));
+                    if (!assemblyPath.StartsWith (input)) {
+                      // TODO - do we want a fixed folder name here?
+                      childMetadata.InnerText = @"References\" + Path.GetFileName (assemblyPath);
+                    }
+                    // TODO - actually store data
+                    plgx.Files.Add (childMetadata.InnerText, new byte[0]);
+                  }
+                }
+                continue;
+              }
+              var includeFile = child.Attributes["Include"];
+              if (includeFile != null &&
+                  !string.IsNullOrWhiteSpace (includeFile.Value))
+              {
+                if (child.LocalName == "ProjectReference") {
+                  // TODO - skip KeePass
+                  // TODO - compile project if needed? and copy assembly
+                  var projectOutput = @"References\" + 
+                    Path.GetFileNameWithoutExtension(UrlUtil.ConvertSeparators(includeFile.Value)) +
+                                      ".dll";                  
+                  var projectReference = project.CreateElement ("Reference");
+                  projectReference.SetAttribute("Include", projectOutput);
+                  child.ParentNode.AppendChild(projectReference);
+                  plgx.Files.Add (projectOutput, new byte[0]);
+                  
+                  child.ParentNode.RemoveChild (child);
+                  continue;
+                }
+                // TODO - actually store data
+                plgx.Files.Add (includeFile.Value, new byte[0]);
+              }
             }
           }
-          foreach (XmlNode compileElement in project.GetElementsByTagName ("None"))
+          // use the in-memory project xml document since we may have changed it
+          using (var stream = new MemoryStream())
           {
-            var includeFile = compileElement.Attributes["Include"];
-            if (!string.IsNullOrWhiteSpace (includeFile.Value)) {
-              plgx.Files.Add (includeFile.Value, new byte[0]);
-            }
+            project.WriteTo (new XmlTextWriter(stream, Encoding.UTF8));
+            plgx.Files.Add (Path.GetFileName (projectFiles[0]), stream.ToArray());
           }
-          // TODO - copy required references (dlls)
-
           #if DEBUG
           Console.WriteLine (plgx.ToString (true));
           #endif

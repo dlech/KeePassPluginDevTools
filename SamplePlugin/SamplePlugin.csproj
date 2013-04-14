@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\Packager\Plgx.targets" />
+  <Import Project="..\PlgxTools\Plgx.targets" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -27,6 +27,11 @@
         <Command type="Execute" command="bin/Debug/KeePass.exe --debug --pw:sample bin/Debug/Databases/Sample.kdbx" />
       </CustomCommands>
     </CustomCommands>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="MONO_TRACE_LISTENER" value="Console.Error" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -61,11 +66,6 @@
         <Command type="Execute" command="bin/ReleasePlgx/KeePass.exe --pw:sample bin/ReleasePlgx/Databases/Sample.kdbx" />
       </CustomCommands>
     </CustomCommands>
-    <EnvironmentVariables>
-      <EnvironmentVariables>
-        <Variable name="MONO_TRACE_LISTENER" value="" />
-      </EnvironmentVariables>
-    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -83,6 +83,12 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="DoNothing.dll">
+      <HintPath>.\DoNothing.dll</HintPath>
+    </Reference>
+    <Reference Include="DoNothing2.dll">
+      <HintPath>..\other\DoNothing2.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SamplePluginExt.cs" />

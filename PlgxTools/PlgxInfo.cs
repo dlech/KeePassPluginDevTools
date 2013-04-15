@@ -109,11 +109,6 @@ namespace KeePassPluginDevTools.PlgxTools
     /// <summary>
     /// The list of files contained in the plgx.
     /// </summary>
-    /// <remarks>
-    /// The contents are stored in a compressed format.
-    /// Call <see cref="ExtractFile(byte[], string)"/> to get the decompressed
-    /// contents of the file.
-    /// </remarks>
     public IDictionary<string, byte[]> Files { get; private set; }
 
     /// <summary>
@@ -176,7 +171,9 @@ namespace KeePassPluginDevTools.PlgxTools
       
       WriteObject(writer, PlgxBeginContent, null);
       
-      RecursiveFileAdd(writer, destDir, new DirectoryInfo(destDir));
+      foreach (var file in Files) {
+        AddFile (writer, file);
+      }
       
       WriteObject(writer, PlgxEndContent, null);
       WriteObject(writer, PlgxEOF, null);
@@ -196,51 +193,29 @@ namespace KeePassPluginDevTools.PlgxTools
       }
     }
 
-    private static void RecursiveFileAdd(BinaryWriter writer,
-                                         string destRootDir,
-                                         DirectoryInfo dirInfo)
-    {
-      if(dirInfo.Name.Equals(".svn", StrUtil.CaseIgnoreCmp)) return; // Skip SVN
-      
-      foreach(FileInfo fi in dirInfo.GetFiles())
-      {
-        if((fi.Name == ".") || (fi.Name == "..")) continue;
-        
-        AddFile(writer, destRootDir, fi.FullName);
-      }
-      
-      foreach(var diSub in dirInfo.GetDirectories())
-        RecursiveFileAdd(writer, destRootDir, diSub);
-    }
 
     private static void AddFile(BinaryWriter writer,
-                                string destRootDir,
-                                string sourceFile)
+                                KeyValuePair<string, byte[]> file)
     {
-      if(sourceFile.EndsWith(".suo", StrUtil.CaseIgnoreCmp)) return;
       
-      var msFile = new MemoryStream();
-      var bwFile = new BinaryWriter(msFile);
-      
-      destRootDir = UrlUtil.EnsureTerminatingSeparator(destRootDir, false);
-      string strRel = UrlUtil.ConvertSeparators(UrlUtil.MakeRelativePath(
-        destRootDir + "Sentinel.txt", sourceFile), '/');
-      WriteObject(bwFile, PlgxfPath, StrUtil.Utf8.GetBytes(strRel));
-      
-      byte[] pbData = (File.ReadAllBytes(sourceFile) ?? new byte[0]);
-      if(pbData.LongLength >= (long)(int.MaxValue / 2)) // Max 1 GB
+      var stream = new MemoryStream();
+      var streamWriter = new BinaryWriter(stream);
+
+      WriteObject(streamWriter, PlgxfPath, StrUtil.Utf8.GetBytes(file.Key));
+
+      if(file.Value.LongLength >= (long)(int.MaxValue / 2)) // Max 1 GB
         throw new OutOfMemoryException();
       
-      byte[] pbCompressed = MemUtil.Compress(pbData);
-      WriteObject(bwFile, PlgxfData, pbCompressed);
+      byte[] compressedData = MemUtil.Compress(file.Value);
+      WriteObject(streamWriter, PlgxfData, compressedData);
       
-      WriteObject(bwFile, PlgxfEOF, null);
+      WriteObject(streamWriter, PlgxfEOF, null);
       
-      WriteObject(writer, PlgxFile, msFile.ToArray());
-      bwFile.Close();
-      msFile.Close();
+      WriteObject(writer, PlgxFile, stream.ToArray());
+      streamWriter.Close();
+      stream.Close();
       
-      if(!MemUtil.ArraysEqual(MemUtil.Decompress(pbCompressed), pbData))
+      if(!MemUtil.ArraysEqual(MemUtil.Decompress(compressedData), file.Value))
         throw new InvalidOperationException();
     }
 
@@ -362,7 +337,8 @@ namespace KeePassPluginDevTools.PlgxTools
       stream.Close();
       
       if (!string.IsNullOrEmpty (path) && contents != null) {
-        return new KeyValuePair<string, byte[]> (path, contents);
+        byte[] pbDecompressed = MemUtil.Decompress(contents);
+        return new KeyValuePair<string, byte[]> (path, pbDecompressed);
       }
       
       Debug.Assert (false);
@@ -435,6 +411,21 @@ namespace KeePassPluginDevTools.PlgxTools
       // remove last newline
       builder.Remove (builder.Length - 1, 1);
       return builder.ToString ();
+    }
+    /// <summary>
+    /// Adds the file from disk.
+    /// </summary>
+    /// <param name="sourceFile">
+    /// The path of the source file located on disk
+    /// </param>
+    /// <param name="destinationFile">
+    /// The relitive path of destination file stored in the plgx
+    /// </param>
+    public void AddFileFromDisk(string sourceFile, string destinationFile)
+    {
+      sourceFile = Path.GetFullPath (sourceFile);
+      var data = File.ReadAllBytes (sourceFile);
+      Files.Add (destinationFile, data);      
     }
   }
 }

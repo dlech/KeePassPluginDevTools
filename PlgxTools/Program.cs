@@ -79,7 +79,7 @@ namespace KeePassPluginDevTools.PlgxTools
         }
 
         if (selectedCommand == Command.Build && input != null && output == null) {
-          output = Path.Combine (input, "..") + Path.PathSeparator;
+          output = Path.Combine (input, "..") + Path.DirectorySeparatorChar;
         }
         input = Path.GetFullPath (input);
         output = Path.GetFullPath (output);
@@ -161,6 +161,7 @@ namespace KeePassPluginDevTools.PlgxTools
           {
             plgx.BaseFileName = assemblyName.InnerText;
           }
+
           foreach (XmlNode itemGroup in project.GetElementsByTagName ("ItemGroup"))
           {
             // make copy of nodes so that we can delete them if needed
@@ -174,15 +175,14 @@ namespace KeePassPluginDevTools.PlgxTools
               if (child.LocalName == "Reference") {
                 foreach(XmlNode childMetadata in child.ChildNodes)
                 {
+                  var assemblyPath = Path.GetFullPath (
+                    Path.Combine (input, UrlUtil.ConvertSeparators(childMetadata.InnerText)));
                   if (childMetadata.Name == "HintPath") {
-                    var assemblyPath = Path.GetFullPath (
-                      Path.Combine (input, UrlUtil.ConvertSeparators(childMetadata.InnerText)));
                     if (!assemblyPath.StartsWith (input)) {
                       // TODO - do we want a fixed folder name here?
                       childMetadata.InnerText = @"References\" + Path.GetFileName (assemblyPath);
                     }
-                    // TODO - actually store data
-                    plgx.Files.Add (childMetadata.InnerText, new byte[0]);
+                    plgx.AddFileFromDisk(assemblyPath, childMetadata.InnerText);
                   }
                 }
                 continue;
@@ -191,6 +191,8 @@ namespace KeePassPluginDevTools.PlgxTools
               if (includeFile != null &&
                   !string.IsNullOrWhiteSpace (includeFile.Value))
               {
+                var includeFilePath = Path.GetFullPath (
+                  Path.Combine (input, UrlUtil.ConvertSeparators(includeFile.Value)));
                 if (child.LocalName == "ProjectReference") {
                   // TODO - skip KeePass
                   // TODO - compile project if needed? and copy assembly
@@ -200,13 +202,12 @@ namespace KeePassPluginDevTools.PlgxTools
                   var projectReference = project.CreateElement ("Reference");
                   projectReference.SetAttribute("Include", projectOutput);
                   child.ParentNode.AppendChild(projectReference);
-                  plgx.Files.Add (projectOutput, new byte[0]);
-                  
+                  plgx.AddFileFromDisk(includeFilePath, projectOutput);
+
                   child.ParentNode.RemoveChild (child);
                   continue;
                 }
-                // TODO - actually store data
-                plgx.Files.Add (includeFile.Value, new byte[0]);
+                plgx.AddFileFromDisk(includeFilePath, includeFile.Value);
               }
             }
           }

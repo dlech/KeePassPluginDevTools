@@ -87,7 +87,7 @@
       <HintPath>.\DoNothing.dll</HintPath>
     </Reference>
     <Reference Include="DoNothing2.dll">
-      <HintPath>..\other\DoNothing2.dll</HintPath>
+      <HintPath>..\fake\lib\DoNothing2.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -98,6 +98,8 @@
     <ProjectReference Include="..\keepass2\KeePass\KeePass.csproj">
       <Project>{10938016-DEE2-4A25-9A5A-8FD3444379CA}</Project>
       <Name>KeePass</Name>
+      <PlgxReference>..\fake\project\bin\Release\Main.dll</PlgxReference>
+      <PlgxReference>..\fake\project\bin\Release\Other.dll</PlgxReference>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

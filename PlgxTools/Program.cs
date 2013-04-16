@@ -35,7 +35,9 @@ namespace KeePassPluginDevTools.PlgxTools
     {
 #if DEBUG
       // set args here for debugging
-      args = new[] { "--build", "../../../SamplePlugin/", "-c=test.xml" };
+      args = new[] { "--build", @"..\..\..\SamplePlugin\",
+        "../../../SamplePlugin/bin/Debug/",
+        "-c=test.xml" };
 #endif
       var selectedCommand = new Command ();
       string input = null;
@@ -78,12 +80,9 @@ namespace KeePassPluginDevTools.PlgxTools
           extras.RemoveAt (0);
         }
 
-        if (selectedCommand == Command.Build && input != null && output == null) {
-          output = Path.Combine (input, "..") + Path.DirectorySeparatorChar;
-        }
-        input = Path.GetFullPath (input);
-        output = Path.GetFullPath (output);
-        config = Path.GetFullPath (config);
+        input = Path.GetFullPath (UrlUtil.ConvertSeparators(input));
+        output = Path.GetFullPath (UrlUtil.ConvertSeparators (output));
+        config = Path.GetFullPath (UrlUtil.ConvertSeparators (config));
 #if DEBUG
         Console.WriteLine ("input:  " + input);
         Console.WriteLine ("output: " + output);
@@ -179,7 +178,7 @@ namespace KeePassPluginDevTools.PlgxTools
                     Path.Combine (input, UrlUtil.ConvertSeparators(childMetadata.InnerText)));
                   if (childMetadata.Name == "HintPath") {
                     if (!assemblyPath.StartsWith (input)) {
-                      // TODO - do we want a fixed folder name here?
+                      // TODO - do we really want a fixed folder name here?
                       childMetadata.InnerText = @"References\" + Path.GetFileName (assemblyPath);
                     }
                     plgx.AddFileFromDisk(assemblyPath, childMetadata.InnerText);
@@ -194,16 +193,28 @@ namespace KeePassPluginDevTools.PlgxTools
                 var includeFilePath = Path.GetFullPath (
                   Path.Combine (input, UrlUtil.ConvertSeparators(includeFile.Value)));
                 if (child.LocalName == "ProjectReference") {
-                  // TODO - skip KeePass
-                  // TODO - compile project if needed? and copy assembly
-                  var projectOutput = @"References\" + 
-                    Path.GetFileNameWithoutExtension(UrlUtil.ConvertSeparators(includeFile.Value)) +
-                                      ".dll";                  
-                  var projectReference = project.CreateElement ("Reference");
-                  projectReference.SetAttribute("Include", projectOutput);
-                  child.ParentNode.AppendChild(projectReference);
-                  plgx.AddFileFromDisk(includeFilePath, projectOutput);
-
+                  foreach(XmlNode projectItem in child.ChildNodes)
+                  {
+                    if (projectItem.LocalName == "PlgxReference")
+                    {
+                      // delete <ProjectReference> element and replace with with
+                      // <Reference> elements using data from <PlgxReference> 
+                      // elements if they exist
+                      var source = Path.GetFullPath (Path.Combine (input,
+                        UrlUtil.ConvertSeparators(projectItem.InnerText)));
+                      var destination = @"Reference\" + Path.GetFileName (source);
+                      var projectReference =
+                        project.CreateElement ("Reference", child.NamespaceURI);
+                      projectReference.SetAttribute("Include",
+                                                    Path.GetFileName (destination));
+                      var hintPath =
+                        project.CreateElement ("HintPath", child.NamespaceURI);
+                      hintPath.InnerText = destination;
+                      projectReference.AppendChild(hintPath);
+                      child.ParentNode.AppendChild(projectReference);
+                      plgx.AddFileFromDisk(source, destination);
+                    }
+                  }
                   child.ParentNode.RemoveChild (child);
                   continue;
                 }
@@ -213,9 +224,16 @@ namespace KeePassPluginDevTools.PlgxTools
           }
           // use the in-memory project xml document since we may have changed it
           using (var stream = new MemoryStream())
-          {
-            project.WriteTo (new XmlTextWriter(stream, Encoding.UTF8));
+          { 
+            var writer = new XmlTextWriter(stream, Encoding.UTF8);
+            writer.Formatting = Formatting.Indented;
+            project.Save (writer);
             plgx.Files.Add (Path.GetFileName (projectFiles[0]), stream.ToArray());
+            #if DEBUG
+            Console.WriteLine (Encoding.UTF8.GetString (
+              plgx.Files[Path.GetFileName (projectFiles[0])]));
+            Console.WriteLine ();
+            #endif
           }
           #if DEBUG
           Console.WriteLine (plgx.ToString (true));
@@ -287,10 +305,6 @@ namespace KeePassPluginDevTools.PlgxTools
       builder.AppendLine ("Commands:");
       builder.AppendFormat (line, "-b", "--build",
                             "Builds .plgx from the specified source directory.");
-      builder.AppendFormat (line, string.Empty, string.Empty,
-                            "If the ouput directory is not specified, the .plgx file will be");
-      builder.AppendFormat (line, string.Empty, string.Empty,
-                            "created in the parent directory of the source directory.");
       builder.AppendFormat (line, "-l", "--list",
                             "Lists contents of .plgx file.");
       builder.AppendLine ();

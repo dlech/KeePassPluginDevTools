@@ -3,6 +3,7 @@
  xmlns:msb="http://schemas.microsoft.com/developer/msbuild/2003"
   elementFormDefault="qualified">
   <xs:element name="PlgxConfiguration" substitutionGroup="msb:Property">
+    <xs:annotation>Options parameters used for creating KeePass Plugin. See http://keepass.info/help/v2_dev/plg_index.html#plgx</xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Prerequisites" minOccurs="0">
@@ -49,47 +50,23 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="IncludeFiles" minOccurs="0">
-          <xs:simpleType>
-            <xs:list itemType="xs:string" />
-          </xs:simpleType>
-        </xs:element>
-        <xs:element name="ExcludeFiles" minOccurs="0">
-          <xs:simpleType>
-            <xs:list itemType="xs:string" />
-          </xs:simpleType>
-        </xs:element>
-        <xs:element name="PackageOutput" minOccurs="0">
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PlgxExtras" substitutionGroup="msb:Property">
+    <xs:annotation>Extra files that need to be included in the Plgx. For example, a program used by the Pre-build command.</xs:annotation>
+    <xs:complexType>
+      <xs:sequence minOccurs="1">
+        <xs:annotation>A list of files</xs:annotation>
+        <xs:element name="Item" minOccurs="1">
+          <xs:annotation>A file to be copied</xs:annotation>
           <xs:complexType>
-            <xs:sequence>
-              <xs:element name="zip" minOccurs="0">
-                <xs:complexType />
-              </xs:element>
-              <xs:element name="deb" minOccurs="0">
-                <xs:complexType>
-                  <xs:attribute name="PackageRevision" type="xs:positiveInteger" default="1" />
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="rpm" minOccurs="0">
-                <xs:complexType>
-                  <xs:attribute name="PackageRevision" type="xs:positiveInteger" default="1" />
-                </xs:complexType>
-              </xs:element>
-              <xs:element name="msi" minOccurs="0">
-                <xs:complexType />
-              </xs:element>
-            </xs:sequence>
-            <xs:attribute name="PackageName" type="xs:string" use="required" />
-            <xs:attribute name="VersionSegments" default="3">
-              <xs:simpleType>
-                <xs:restriction base="xs:positiveInteger">
-                  <xs:enumeration value="2" />
-                  <xs:enumeration value="3" />
-                  <xs:enumeration value="4" />
-                </xs:restriction>
-              </xs:simpleType>
+            <xs:attribute name="Source" type="xs:string" use="required">
+              <xs:annotation>The path to the source of the file that will be copied</xs:annotation>
             </xs:attribute>
-            <xs:attribute name="DestinationPath" type="xs:string" use="required" />
+            <xs:attribute name="Destination" type="xs:string" use="required">
+              <xs:annotation>The relitive path where the file will be stored in the .plgx</xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
       </xs:sequence>

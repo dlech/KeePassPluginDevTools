@@ -26,12 +26,6 @@ namespace KeePassPluginDevTools.PlgxTools {
         
         private PlgxConfigurationBuildCommands buildCommandsField;
         
-        private string includeFilesField;
-        
-        private string excludeFilesField;
-        
-        private PlgxConfigurationPackageOutput packageOutputField;
-        
         /// <remarks/>
         public PlgxConfigurationPrerequisites Prerequisites {
             get {
@@ -49,36 +43,6 @@ namespace KeePassPluginDevTools.PlgxTools {
             }
             set {
                 this.buildCommandsField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public string IncludeFiles {
-            get {
-                return this.includeFilesField;
-            }
-            set {
-                this.includeFilesField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public string ExcludeFiles {
-            get {
-                return this.excludeFilesField;
-            }
-            set {
-                this.excludeFilesField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public PlgxConfigurationPackageOutput PackageOutput {
-            get {
-                return this.packageOutputField;
-            }
-            set {
-                this.packageOutputField = value;
             }
         }
     }
@@ -228,172 +192,53 @@ namespace KeePassPluginDevTools.PlgxTools {
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class PlgxConfigurationPackageOutput {
+    [System.Xml.Serialization.XmlRootAttribute(Namespace="", IsNullable=false)]
+    public partial class PlgxExtras {
         
-        private string packageNameField;
+        private PlgxExtrasItem itemField;
         
-        private PlgxConfigurationPackageOutputVersionSegments versionSegmentsField;
+        /// <remarks/>
+        public PlgxExtrasItem Item {
+            get {
+                return this.itemField;
+            }
+            set {
+                this.itemField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.1")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class PlgxExtrasItem {
         
-        private string destinationPathField;
+        private string sourceField;
         
-        private PlgxConfigurationPackageOutputZip zipField;
-        
-        private PlgxConfigurationPackageOutputDeb debField;
-        
-        private PlgxConfigurationPackageOutputRpm rpmField;
-        
-        private PlgxConfigurationPackageOutputMsi msiField;
+        private string destinationField;
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string PackageName {
+        public string Source {
             get {
-                return this.packageNameField;
+                return this.sourceField;
             }
             set {
-                this.packageNameField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.ComponentModel.DefaultValue(PlgxConfigurationPackageOutputVersionSegments.Item3)]
-        [System.Xml.Serialization.XmlAttributeAttribute()]
-        public PlgxConfigurationPackageOutputVersionSegments VersionSegments {
-            get {
-                return this.versionSegmentsField;
-            }
-            set {
-                this.versionSegmentsField = value;
+                this.sourceField = value;
             }
         }
         
         /// <remarks/>
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public string DestinationPath {
+        public string Destination {
             get {
-                return this.destinationPathField;
+                return this.destinationField;
             }
             set {
-                this.destinationPathField = value;
+                this.destinationField = value;
             }
         }
-        
-        /// <remarks/>
-        public PlgxConfigurationPackageOutputZip zip {
-            get {
-                return this.zipField;
-            }
-            set {
-                this.zipField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public PlgxConfigurationPackageOutputDeb deb {
-            get {
-                return this.debField;
-            }
-            set {
-                this.debField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public PlgxConfigurationPackageOutputRpm rpm {
-            get {
-                return this.rpmField;
-            }
-            set {
-                this.rpmField = value;
-            }
-        }
-        
-        /// <remarks/>
-        public PlgxConfigurationPackageOutputMsi msi {
-            get {
-                return this.msiField;
-            }
-            set {
-                this.msiField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.1")]
-    [System.SerializableAttribute()]
-    public enum PlgxConfigurationPackageOutputVersionSegments {
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("2")]
-        Item2,
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("3")]
-        Item3,
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlEnumAttribute("4")]
-        Item4,
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.1")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class PlgxConfigurationPackageOutputZip {
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.1")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class PlgxConfigurationPackageOutputDeb {
-        
-        private string packageRevisionField;
-        
-        /// <remarks/>
-        [System.ComponentModel.DefaultValue("1")]
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="positiveInteger")]
-        public string PackageRevision {
-            get {
-                return this.packageRevisionField;
-            }
-            set {
-                this.packageRevisionField = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.1")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class PlgxConfigurationPackageOutputRpm {
-        
-        private string packageRevisionField1;
-        
-        /// <remarks/>
-        [System.ComponentModel.DefaultValue("1")]
-        [System.Xml.Serialization.XmlAttributeAttribute(DataType="positiveInteger")]
-        public string PackageRevision {
-            get {
-                return this.packageRevisionField1;
-            }
-            set {
-                this.packageRevisionField1 = value;
-            }
-        }
-    }
-    
-    /// <remarks/>
-    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Xml", "4.0.30319.1")]
-    [System.SerializableAttribute()]
-    [System.Diagnostics.DebuggerStepThroughAttribute()]
-    [System.ComponentModel.DesignerCategoryAttribute("code")]
-    public partial class PlgxConfigurationPackageOutputMsi {
     }
 }

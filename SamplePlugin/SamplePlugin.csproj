@@ -77,6 +77,9 @@
         <DotNetVersion>4.0</DotNetVersion>
       </Prerequsites>
     </PlgxConfiguration>
+    <PlgxExtras>
+      <Item Source="..\fake\lib\PreBuild.exe" Destination="bin\Prebuild.exe" />
+    </PlgxExtras>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

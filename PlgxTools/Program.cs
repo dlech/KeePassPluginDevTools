@@ -161,6 +161,25 @@ namespace KeePassPluginDevTools.PlgxTools
             plgx.BaseFileName = assemblyName.InnerText;
           }
 
+          foreach (XmlNode extras in project.GetElementsByTagName ("PlgxExtras"))
+          {
+            foreach(XmlNode child in extras.ChildNodes)
+            {
+              if(child.LocalName == "Item") {
+                var source =  child.Attributes["Source"];
+                var destination = child.Attributes["Destination"];
+                if (source != null && !string.IsNullOrWhiteSpace(source.Value) &&
+                    destination != null && !string.IsNullOrWhiteSpace (destination.Value))
+                {
+                  var sourcePath = UrlUtil.ConvertSeparators (source.Value);
+                  sourcePath = Path.Combine (input, sourcePath);
+                  sourcePath = Path.GetFullPath (sourcePath);
+                  plgx.AddFileFromDisk (sourcePath, destination.Value);
+                }
+              }
+            }
+          }
+
           foreach (XmlNode itemGroup in project.GetElementsByTagName ("ItemGroup"))
           {
             // make copy of nodes so that we can delete them if needed

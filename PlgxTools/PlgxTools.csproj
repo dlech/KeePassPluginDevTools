@@ -50,6 +50,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="NDesk.Options\Options.cs" />
     <Compile Include="Microsoft.Build.Plgx_xsd.cs" />
+    <Compile Include="XmlNamespaceStripper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

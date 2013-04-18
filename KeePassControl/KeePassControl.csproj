@@ -110,12 +110,6 @@
     </None>
     <None Include="Resources\test1.kdbx" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\keepass2\KeePass\KeePass.csproj">
-      <Project>{10938016-DEE2-4A25-9A5A-8FD3444379CA}</Project>
-      <Name>KeePass</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -124,4 +118,10 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <ProjectReference Include="..\keepass2\KeePass\KeePass.csproj">
+      <Project>{10938016-DEE2-4A25-9A5A-8FD3444379CA}</Project>
+      <Name>KeePass</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

@@ -120,7 +120,7 @@ namespace KeePassPluginDevTools.PlgxTools
       Files = new Dictionary<string, byte[]> ();
     }
 
-    private void WriteFile(string destDir)
+    public void WriteFile(string destDir)
     {
       string plgxFileName =
         Path.Combine (destDir, BaseFileName + "." + PlgxExtension);

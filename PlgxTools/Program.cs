@@ -119,6 +119,7 @@ namespace KeePassPluginDevTools.PlgxTools
         #region Build Command
         case Command.Build:       
           try {
+            // populate common information for all plgx
             var plgx = new PlgxInfo ();
             plgx.Version = PlgxInfo.PlgxVersion1;
             plgx.FileUuid = new PwUuid (true);
@@ -128,10 +129,15 @@ namespace KeePassPluginDevTools.PlgxTools
             plgx.GeneratorVersion = 
             StrUtil.ParseVersion (assm.Version.ToString ());
 
+            // read the optional config file to get the rest of the plgx header
+            // information
             if (config != null) {
               var configDoc = new XmlDocument();
               configDoc.Load (config);
+              // mono xbuild adds namespaces for some reason, so we have to
+              // strip them or else the serializer fails
               configDoc = XmlNamespaceStripper.StripNamespace (configDoc);
+
               var serializer = new XmlSerializer (typeof(PlgxConfiguration));
               if (verbose) {
 #if DEBUG
@@ -180,6 +186,8 @@ namespace KeePassPluginDevTools.PlgxTools
               }
             }  
 
+            // read the .csproj file to find which files we need to include in
+            // the plgx
             var projectFiles = Directory.GetFiles (input, "*.csproj");
             if (projectFiles.Length != 1) {
               Console.WriteLine ("Source directory must contain one and only on .csproj file");
@@ -188,12 +196,15 @@ namespace KeePassPluginDevTools.PlgxTools
             var project = new XmlDocument ();
             project.Load (projectFiles [0]);
 
-            foreach (XmlNode assemblyName in project.GetElementsByTagName ("AssemblyName")) {
+            var assemblyNames = project.GetElementsByTagName ("AssemblyName");
+            foreach (XmlNode assemblyName in assemblyNames) {
               plgx.BaseFileName = assemblyName.InnerText;
             }
 
-            foreach (XmlNode extras in project.GetElementsByTagName ("PlgxExtras")) {
-              foreach (XmlNode child in extras.ChildNodes) {
+            // include any files from <PlgxExtras> elements
+            var plgxExtras = project.GetElementsByTagName ("PlgxExtras");
+            foreach (XmlNode extra in plgxExtras) {
+              foreach (XmlNode child in extra.ChildNodes) {
                 if (child.LocalName == "Item") {
                   var source = child.Attributes ["Source"];
                   var destination = child.Attributes ["Destination"];
@@ -208,8 +219,11 @@ namespace KeePassPluginDevTools.PlgxTools
               }
             }
 
-            foreach (XmlNode itemGroup in project.GetElementsByTagName ("ItemGroup")) {
-              // make copy of nodes so that we can delete them if needed
+            // include all of the project files unless specifically excluded
+            var itemGroups = project.GetElementsByTagName ("ItemGroup");
+            foreach (XmlNode itemGroup in itemGroups) {
+              // make copy of nodes so that we can delete them inside of the for
+              // loop if we need to
               var children = new List<XmlNode> ();
               foreach (XmlNode child in itemGroup.ChildNodes) {
                 children.Add (child);
@@ -229,17 +243,39 @@ namespace KeePassPluginDevTools.PlgxTools
                   }
                   continue;
                 }
+                // technically, the Include attribute is a semicolon separated
+                // list and can include wildcards, but KeePass is only looking
+                // for single files here, so we should not have to take this
+                // into account
                 var includeFile = child.Attributes ["Include"];
                 if (includeFile != null &&
-                  !string.IsNullOrWhiteSpace (includeFile.Value)) {
+                  !string.IsNullOrWhiteSpace (includeFile.Value))
+                {
+                  // skip "Include" files that are marked for exclusion from 
+                  // the .plgx
+                  var exclude = false;
+                  foreach(XmlNode grandchild in child.ChildNodes)
+                  {
+                    if (grandchild.LocalName == "ExcludeFromPlgx") {
+                      exclude = true;
+                      break;
+                    }
+                  }
+                  if (exclude) {
+                    continue;
+                  }
+
+                  // copy all project items that have an Include attribute
                   var includeFilePath = Path.GetFullPath (
                   Path.Combine (input, UrlUtil.ConvertSeparators (includeFile.Value)));
+
+                  // <ProjectReference> elements get deleted.
+                  // If the <ProjectReference> element has <PlgxReference> child
+                  // elements, new <Reference> elements will be created using the
+                  // data from the <PlgxReference> element
                   if (child.LocalName == "ProjectReference") {
                     foreach (XmlNode projectItem in child.ChildNodes) {
                       if (projectItem.LocalName == "PlgxReference") {
-                        // delete <ProjectReference> element and replace with with
-                        // <Reference> elements using data from <PlgxReference> 
-                        // elements if they exist
                         var source = Path.GetFullPath (Path.Combine (input,
                         UrlUtil.ConvertSeparators (projectItem.InnerText)));
                         var destination = @"Reference\" + Path.GetFileName (source);
@@ -255,6 +291,7 @@ namespace KeePassPluginDevTools.PlgxTools
                         plgx.AddFileFromDisk (source, destination);
                       }
                     }
+
                     child.ParentNode.RemoveChild (child);
                     continue;
                   }
@@ -262,18 +299,19 @@ namespace KeePassPluginDevTools.PlgxTools
                 }
               }
             }
-            // use the in-memory project xml document since we may have changed it
+            // write the in-memory project xml document (.csproj) to the plgx
+            // instead of the file on disk since we may have changed it
             using (var stream = new MemoryStream()) { 
               var writer = new XmlTextWriter (stream, Encoding.UTF8);
               writer.Formatting = Formatting.Indented;
               project.Save (writer);
               plgx.Files.Add (Path.GetFileName (projectFiles [0]), stream.ToArray ());
 #if DEBUG
-            if (verbose) {
-              Console.WriteLine (Encoding.UTF8.GetString (
-                plgx.Files[Path.GetFileName (projectFiles[0])]));
-              Console.WriteLine ();
-            }
+              if (verbose) {
+                Console.WriteLine (Encoding.UTF8.GetString (
+                  plgx.Files[Path.GetFileName (projectFiles[0])]));
+                Console.WriteLine ();
+              }
 #endif
             }
             if (verbose) {
@@ -319,7 +357,7 @@ namespace KeePassPluginDevTools.PlgxTools
       string executable = 
         Environment.OSVersion.Platform == PlatformID.Win32Windows ?
           "PlgxTool.exe" : "plgx-tool";
-      var line = "{0,-4}{1,-12}{2}\n";
+      const string line = "{0,-4}{1,-12}{2}\n";
 
       var builder = new StringBuilder ();
       builder.AppendLine ();
@@ -359,6 +397,10 @@ namespace KeePassPluginDevTools.PlgxTools
                             "Output file or directory.");
       builder.AppendFormat (line, "-c", "--config[uration]",
                             "Configuration file.");
+      builder.AppendFormat (line, "-v", "--verbose",
+                            "Print additional info when creating plgx.");
+      builder.AppendFormat (line, string.Empty, string.Empty,
+                            "Useful for troubleshooting.");
       builder.AppendLine ();
 
       return builder.ToString ();

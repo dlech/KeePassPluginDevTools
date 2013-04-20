@@ -54,7 +54,7 @@
     </xs:complexType>
   </xs:element>
   <xs:element name="PlgxExtras" substitutionGroup="msb:Property">
-    <xs:annotation>Extra files that need to be included in the Plgx. For example, a program used by the Pre-build command.</xs:annotation>
+    <xs:annotation>Extra files that are not part of the .csproj but still need to be included in the Plgx. For example, a program used by the Pre-build command.</xs:annotation>
     <xs:complexType>
       <xs:sequence minOccurs="1">
         <xs:annotation>A list of files</xs:annotation>

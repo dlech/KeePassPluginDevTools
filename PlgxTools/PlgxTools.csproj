@@ -32,34 +32,22 @@
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\keepass2\KeePass\KeePass.csproj">
-      <Project>{10938016-DEE2-4A25-9A5A-8FD3444379CA}</Project>
-      <Name>KeePass</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\KeePassControl\KeePassControl.csproj">
-      <Project>{7B11CC40-373F-4C20-99A5-DD70F3317D5C}</Project>
-      <Name>KeePassControl</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="PlgxInfo.cs" />
     <Compile Include="Microsoft.Build.Plgx.cs">
       <DependentUpon>Microsoft.Build.Plgx.xsd</DependentUpon>
     </Compile>
-    <Compile Include="PlgxPackager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="NDesk.Options\Options.cs" />
     <Compile Include="Microsoft.Build.Plgx_xsd.cs" />
     <Compile Include="XmlNamespaceStripper.cs" />
+    <Compile Include="PlgxException.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <Reference Include="Microsoft.Build.Engine" />
-    <Reference Include="Microsoft.Build.Framework" />
-    <Reference Include="Microsoft.Build.Tasks.v4.0" />
-    <Reference Include="Microsoft.Build.Utilities.v4.0" />
+    <Reference Include="KeePassLib">
+      <HintPath>..\lib\KeePass\KeePassLib.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>

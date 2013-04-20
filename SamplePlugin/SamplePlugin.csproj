@@ -86,24 +86,19 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="DoNothing.dll">
-      <HintPath>.\DoNothing.dll</HintPath>
+    <Reference Include="KeePass.exe">
+      <HintPath>$(KeePassPath)KeePass.exe</HintPath>
     </Reference>
-    <Reference Include="DoNothing2.dll">
+    <Reference Include="DoNothing">
+      <HintPath>DoNothing.dll</HintPath>
+    </Reference>
+    <Reference Include="DoNothing2">
       <HintPath>..\fake\lib\DoNothing2.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SamplePluginExt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\keepass2\KeePass\KeePass.csproj">
-      <Project>{10938016-DEE2-4A25-9A5A-8FD3444379CA}</Project>
-      <Name>KeePass</Name>
-      <PlgxReference>..\fake\project\bin\Release\Main.dll</PlgxReference>
-      <PlgxReference>..\fake\project\bin\Release\Other.dll</PlgxReference>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="KeePass.exe.config">

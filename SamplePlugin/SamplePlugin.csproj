@@ -123,6 +123,10 @@ robocopy /s /mir "$(ProjectDir)." "%25TEMP%25\$(ProjectName)" /xf *.config *.xml
 move "%25TEMP%25\$(TargetName).plgx" "$(TargetPath)$(TargetName).plgx"
 rmdir /s /q "%25TEMP%25\$(ProjectName)"</PostBuildEvent>
   </PropertyGroup>
+  <Target Name="AfterClean">
+    <Delete Files="$(OutputPath)KeePass.exe" />
+    <RemoveDir Directories="$(OutputPath)Databases" Condition="Exists('$(OutputPath)Databases')" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -118,6 +118,15 @@ namespace KeePassPluginDevTools.Control
       return StartKeePass(exitAllFirst, true, 1, defaultTimeout);
     }
 
+    /// <summary>
+    /// Starts the kee pass.
+    /// </summary>
+    /// <returns>The kee pass.</returns>
+    /// <param name="exitAllFirst">If set to <c>true</c>, sends singal to any
+    /// running instances of KeePass to exit.</param>
+    /// <param name="copyConfig">If set to <c>true</c> copy the standard 
+    /// KeePass.config.xml file to the working ouput directory</param>
+    /// <param name="numDbFiles">Number db files to load.</param>
     [Obsolete]
     public static IPluginHost StartKeePass(bool exitAllFirst,
         bool copyConfig, int numDbFiles)

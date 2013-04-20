@@ -16,7 +16,7 @@
     <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
+    <OutputPath>..\build\bin\Debug</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,12 +25,14 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>True</Optimize>
-    <OutputPath>bin\Release</OutputPath>
+    <OutputPath>..\build\bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
   </PropertyGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="NDesk.Options\" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="PlgxInfo.cs" />
     <Compile Include="Microsoft.Build.Plgx.cs">
@@ -61,12 +63,15 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Plgx.targets" />
+    <None Include="Plgx.targets">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="BeforeBuild">
     <Exec Command="xsd Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
   </Target>
-  <ItemGroup>
-    <Folder Include="NDesk.Options\" />
-  </ItemGroup>
+  <Target Name="AfterClean">
+    <Delete Files="$(OutputPath)KeePassLib.dll" />
+  </Target>
 </Project>

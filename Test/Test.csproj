@@ -38,4 +38,7 @@
     <Compile Include="PlgxBuilderTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Target Name="AfterClean">
+    <Delete Files="$(OutputPath)nunit.framework.dll" />
+  </Target>
 </Project>

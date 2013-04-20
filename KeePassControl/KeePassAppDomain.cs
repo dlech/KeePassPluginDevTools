@@ -76,6 +76,15 @@ namespace KeePassPluginDevTools.Control
           AppDomain.CurrentDomain.SetupInformation);
     }
 
+    /// <summary>
+    /// Releases all resource used by the <see cref="KeePassPluginDevTools.Control.KeePassAppDomain"/> object.
+    /// </summary>
+    /// <remarks>Call <see cref="Dispose"/> when you are finished using the
+    /// <see cref="KeePassPluginDevTools.Control.KeePassAppDomain"/>. The <see cref="Dispose"/> method leaves the
+    /// <see cref="KeePassPluginDevTools.Control.KeePassAppDomain"/> in an unusable state. After calling
+    /// <see cref="Dispose"/>, you must release all references to the
+    /// <see cref="KeePassPluginDevTools.Control.KeePassAppDomain"/> so the garbage collector can reclaim the memory
+    /// that the <see cref="KeePassPluginDevTools.Control.KeePassAppDomain"/> was occupying.</remarks>
     public void Dispose()
     {
       if (mAppDomain != null && !mAppDomain.IsFinalizingForUnload())
@@ -402,6 +411,10 @@ namespace KeePassPluginDevTools.Control
       return true;
     }
 
+    /// <summary>
+    /// Loads the plgx.
+    /// </summary>
+    /// <param name="plgxPath">Plgx path.</param>
     public void LoadPlgx(string plgxPath)
     {
       const string plgxPathName = "KEEPASS_PLGX_PATH";
@@ -432,14 +445,13 @@ namespace KeePassPluginDevTools.Control
     /// </summary>
     /// <param name="name"></param>
     /// <returns></returns>
-
     public object GetData(string name)
     {
       return mAppDomain.GetData(name);
     }
 
     /// <summary>
-    /// <see cref="System.AppDomain.SetData"/>
+    /// <see cref="System.AppDomain.SetData(string, object)"/>
     /// </summary>
     /// <param name="name"></param>
     /// <param name="data"></param>

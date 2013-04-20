@@ -3,7 +3,19 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
   
-  <Target Name="BuildPlgx">    
-	  <Exec Command="notify-send '$(PlgxConfiguration)'" Condition=" '$(OS)' != 'Windows_NT' "></Exec>
+  <Target Name="BuildPlgx">
+    <WriteLinesToFile File="$(IntermediateOutputPath)PlgxConfig.xml"
+     Lines="&lt;PlgxConfiguration&gt;$(PlgxConfiguration)&lt;/PlgxConfiguration&gt;"
+     Overwrite="true" />
+    <CreateProperty Value="mono" Condition="'$(MonoExec)' == '' And '$(OS)' != 'Windows_NT'">
+      <Output TaskParameter="Value" PropertyName="MonoExec" />
+    </CreateProperty>
+    <Exec Command="$(MonoExec) &quot;$(PlgxToolDir)PlgxTool.exe&quot; --build --verbose --input=&quot;$(MSBuildProjectDirectory)&quot; --output=&quot;$(OutputPath)&quot; --config=&quot;$(IntermediateOutputPath)PlgxConfig.xml&quot;"
+      Outputs="$(OutputPath)$(AssemblyName).plgx">
+      <Output TaskParameter="Outputs" ItemName="FileWrites" />
+    </Exec>
+    <WriteLinesToFile
+      File="$(IntermediateOutputPath)$(CleanFile)"
+      Lines="@(FileWrites->'%(FullPath)')" />
   </Target>
 </Project>

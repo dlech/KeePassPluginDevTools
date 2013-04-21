@@ -10,9 +10,6 @@ using KeePassLib;
 using System.Reflection;
 using System.Collections.Generic;
 
-[assembly:AssemblyVersion("0.1.0.*")]
-[assembly:AssemblyFileVersion("0.1.0.0")]
-
 namespace KeePassPluginDevTools.PlgxTools
 { 
   public class Program

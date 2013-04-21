@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("KeePass Plugin Packager")]
-[assembly: AssemblyDescription("Creates packages for distributing KeePass Plugin")]
+[assembly: AssemblyTitle("KeePass Plugin Zip Packager")]
+[assembly: AssemblyDescription("Creates .zip file packages for distributing KeePass Plugin")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("David Lechner")]
-[assembly: AssemblyProduct("KeePass Plugin Packager")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyProduct("KeePass Plugin Developer Tools")]
+[assembly: AssemblyCopyright("Copyright 2012-2013 David Lechner")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

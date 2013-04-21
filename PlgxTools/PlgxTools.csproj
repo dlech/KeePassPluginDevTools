@@ -11,6 +11,7 @@
     <AssemblyName>PlgxTool</AssemblyName>
     <Description>Tools for creating and inspecting KeePass 2.x Plugin (.plgx) files</Description>
     <StartupObject>KeePassPluginDevTools.PlgxTools.Program</StartupObject>
+    <ReleaseVersion>0.2.0</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -32,6 +33,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="NDesk.Options\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PlgxInfo.cs" />
@@ -43,6 +45,7 @@
     <Compile Include="Microsoft.Build.Plgx_xsd.cs" />
     <Compile Include="XmlNamespaceStripper.cs" />
     <Compile Include="PlgxException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

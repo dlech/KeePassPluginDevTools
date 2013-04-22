@@ -11,7 +11,7 @@
     <AssemblyName>PlgxTool</AssemblyName>
     <Description>Tools for creating and inspecting KeePass 2.x Plugin (.plgx) files</Description>
     <StartupObject>KeePassPluginDevTools.PlgxTools.Program</StartupObject>
-    <ReleaseVersion>0.2.0</ReleaseVersion>
+    <ReleaseVersion>0.2.1</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>

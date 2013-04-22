@@ -11,7 +11,7 @@
     <RootNamespace>KeePassPluginDevTools.ZipPackager</RootNamespace>
     <AssemblyName>Packager</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <ReleaseVersion>0.2.0</ReleaseVersion>
+    <ReleaseVersion>0.2.1</ReleaseVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>

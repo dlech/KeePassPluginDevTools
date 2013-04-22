@@ -230,7 +230,10 @@ namespace KeePassPluginDevTools.PlgxTools
                   foreach (XmlNode childMetadata in child.ChildNodes) {
                     var assemblyPath = Path.GetFullPath (
                     Path.Combine (input, UrlUtil.ConvertSeparators (childMetadata.InnerText)));
-                    if (childMetadata.Name == "HintPath") {
+                    if (childMetadata.Name == "HintPath" &&
+                        (child.Attributes ["Include"] == null ||
+                         child.Attributes ["Include"].Value != "KeePass.exe"))
+                    {
                       if (!assemblyPath.StartsWith (input)) {
                         // TODO - do we really want a fixed folder name here?
                         childMetadata.InnerText = @"References\" + Path.GetFileName (assemblyPath);

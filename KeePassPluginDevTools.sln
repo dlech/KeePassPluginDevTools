@@ -146,7 +146,7 @@ Global
 		$4.inheritsScope = application/xml
 		$4.scope = application/xml
 		description = Collection of tools used for developing plugins for KeePass 2.x
-		version = 0.2.0
+		version = 0.2.1
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

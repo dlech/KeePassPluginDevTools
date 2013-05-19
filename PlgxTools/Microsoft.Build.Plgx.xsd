@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
  xmlns:msb="http://schemas.microsoft.com/developer/msbuild/2003"
-  elementFormDefault="qualified">
+ elementFormDefault="qualified">
   <xs:element name="PlgxConfiguration" substitutionGroup="msb:Property">
-    <xs:annotation>Options parameters used for creating KeePass Plugin. See http://keepass.info/help/v2_dev/plg_index.html#plgx</xs:annotation>
+    <xs:annotation>
+      <xs:documentation>Options parameters used for creating KeePass Plugin. See http://keepass.info/help/v2_dev/plg_index.html#plgx</xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Prerequisites" minOccurs="0">
@@ -54,18 +56,28 @@
     </xs:complexType>
   </xs:element>
   <xs:element name="PlgxExtras" substitutionGroup="msb:Property">
-    <xs:annotation>Extra files that are not part of the .csproj but still need to be included in the Plgx. For example, a program used by the Pre-build command.</xs:annotation>
+    <xs:annotation>
+      <xs:documentation>Extra files that are not part of the .csproj but still need to be included in the Plgx. For example, a program used by the Pre-build command.</xs:documentation>
+    </xs:annotation>
     <xs:complexType>
       <xs:sequence minOccurs="1">
-        <xs:annotation>A list of files</xs:annotation>
+        <xs:annotation>
+          <xs:documentation>A list of files</xs:documentation>
+          </xs:annotation>
         <xs:element name="Item" minOccurs="1">
-          <xs:annotation>A file to be copied</xs:annotation>
+          <xs:annotation>
+            <xs:documentation>A file to be copied</xs:documentation>
+            </xs:annotation>
           <xs:complexType>
             <xs:attribute name="Source" type="xs:string" use="required">
-              <xs:annotation>The path to the source of the file that will be copied</xs:annotation>
+              <xs:annotation>
+                <xs:documentation>The path to the source of the file that will be copied</xs:documentation>
+              </xs:annotation>
             </xs:attribute>
             <xs:attribute name="Destination" type="xs:string" use="required">
-              <xs:annotation>The relitive path where the file will be stored in the .plgx</xs:annotation>
+              <xs:annotation>
+                <xs:documentation>The relitive path where the file will be stored in the .plgx</xs:documentation>
+              </xs:annotation>
             </xs:attribute>
           </xs:complexType>
         </xs:element>

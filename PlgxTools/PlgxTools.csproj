@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -31,10 +31,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="NDesk.Options\" />
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="PlgxInfo.cs" />
     <Compile Include="Microsoft.Build.Plgx.cs">
@@ -71,28 +68,25 @@
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-
   <Target Name="GetXsdExe">
     <!-- based on http://connect.microsoft.com/VisualStudio/feedback/details/583931/xsd-exe-should-be-accessible-from-ide-builds -->
     <GetFrameworkSdkPath>
       <Output TaskParameter="Path" PropertyName="SdkPath" />
     </GetFrameworkSdkPath>
-      <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-        <XsdExe>"$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe"</XsdExe>
-      </PropertyGroup>
-      <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-        <XsdExe>xsd</XsdExe>
-      </PropertyGroup>
+    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+      <XsdExe>"$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe"</XsdExe>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+      <XsdExe>xsd</XsdExe>
+    </PropertyGroup>
   </Target>
-  
   <Target Name="BeforeBuild">
     <CallTarget Targets="GetXsdExe" />
-    <Exec Command='"$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe" Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)' />
-  </Target>   
+    <Exec Command="&quot;$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe&quot; Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
+  </Target>
   <Target Name="BeforeBuild">
     <Exec Command="$(XsdExe) Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
   </Target>
-
   <Target Name="AfterClean">
     <Delete Files="$(OutputPath)KeePassLib.dll" />
   </Target>

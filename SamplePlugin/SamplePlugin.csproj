@@ -82,6 +82,16 @@
       <Item Source="..\fake\lib\PreBuild.exe" Destination="bin\Prebuild.exe" />
     </PlgxExtras>
   </PropertyGroup>
+  <Choose>
+    <When Condition="'$(KeePassPath)' == ''">
+      <PropertyGroup Condition="'$(ProgramFiles(x86))' != ''">
+        <KeePassPath>$(ProgramFiles(x86))\KeePass Password Safe 2\</KeePassPath>
+      </PropertyGroup>
+      <PropertyGroup Condition="'$(ProgramFiles)' != ''">
+        <KeePassPath>$(ProgramFiles)\KeePass Password Safe 2\</KeePassPath>
+      </PropertyGroup>
+    </When>
+  </Choose>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />

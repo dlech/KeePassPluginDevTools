@@ -10,7 +10,7 @@
     <CreateProperty Value="mono" Condition="'$(MonoExec)' == '' And '$(OS)' != 'Windows_NT'">
       <Output TaskParameter="Value" PropertyName="MonoExec" />
     </CreateProperty>
-    <Exec Command="$(MonoExec) &quot;$(KeePassPluginDevToolsPath)PlgxTool.exe&quot; --build --verbose --input=&quot;$(MSBuildProjectDirectory)&quot; --output=&quot;$(OutputPath)&quot; --config=&quot;$(IntermediateOutputPath)PlgxConfig.xml&quot;"
+    <Exec Command="$(MonoExec) &quot;$(KeePassPluginDevToolsPath)PlgxTool.exe&quot; --build --verbose --input=&quot;$(MSBuildProjectDirectory)&quot; --output=&quot;$(OutputPath).&quot; --config=&quot;$(IntermediateOutputPath)PlgxConfig.xml&quot;"
       Outputs="$(OutputPath)$(AssemblyName).plgx">
       <Output TaskParameter="Outputs" ItemName="FileWrites" />
     </Exec>

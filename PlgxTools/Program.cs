@@ -80,15 +80,10 @@ namespace KeePassPluginDevTools.PlgxTools
           extras.RemoveAt (0);
         }
 
-        if (!string.IsNullOrWhiteSpace (input)) {
-          input = Path.GetFullPath (UrlUtil.ConvertSeparators (input));
-        }
-        if (!string.IsNullOrWhiteSpace (output)) {
-          output = Path.GetFullPath (UrlUtil.ConvertSeparators (output));
-        }
-        if (!string.IsNullOrWhiteSpace (config)) {
-          config = Path.GetFullPath (UrlUtil.ConvertSeparators (config));
-        }
+        input = GetFullPath(input);
+        output = GetFullPath(output);
+        config = GetFullPath(config);
+
         if (verbose) {
           Console.WriteLine ("input:  " + input);
           Console.WriteLine ("output: " + output);
@@ -404,6 +399,18 @@ namespace KeePassPluginDevTools.PlgxTools
       builder.AppendLine ();
 
       return builder.ToString ();
+    }
+
+    /// <summary>
+    /// Strips trailing separator, converts path separators and converts
+    /// to full path
+    /// </summary>
+    private static string GetFullPath(string path) {
+      if (string.IsNullOrWhiteSpace(path)) {
+        return string.Empty;
+      }
+      path = UrlUtil.ConvertSeparators(path);
+      return Path.GetFullPath(path);
     }
   }
 }

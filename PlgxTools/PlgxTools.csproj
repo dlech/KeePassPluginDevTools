@@ -73,18 +73,15 @@
     <GetFrameworkSdkPath>
       <Output TaskParameter="Path" PropertyName="SdkPath" />
     </GetFrameworkSdkPath>
-    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-      <XsdExe>"$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe"</XsdExe>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-      <XsdExe>xsd</XsdExe>
-    </PropertyGroup>
+    <CreateProperty Condition="'$(OS)' == 'Windows_NT'" Value="$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe">
+        <Output TaskParameter="Value" PropertyName="XsdExe" />
+    </CreateProperty>
+    <CreateProperty Condition="'$(OS)' != 'Windows_NT'" Value="xsd">
+        <Output TaskParameter="Value" PropertyName="XsdExe" />
+    </CreateProperty>
   </Target>
   <Target Name="BeforeBuild">
     <CallTarget Targets="GetXsdExe" />
-    <Exec Command="&quot;$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe&quot; Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
-  </Target>
-  <Target Name="BeforeBuild">
     <Exec Command="$(XsdExe) Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
   </Target>
   <Target Name="AfterClean">

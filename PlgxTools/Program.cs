@@ -227,7 +227,8 @@ namespace KeePassPluginDevTools.PlgxTools
                     Path.Combine (input, UrlUtil.ConvertSeparators (childMetadata.InnerText)));
                     if (childMetadata.Name == "HintPath" &&
                         (child.Attributes ["Include"] == null ||
-                         child.Attributes ["Include"].Value != "KeePass.exe"))
+                         (!child.Attributes ["Include"].Value.StartsWith("KeePass,") &&
+                          !child.Attributes ["Include"].Value.StartsWith("KeePass.exe"))))
                     {
                       if (!assemblyPath.StartsWith (input)) {
                         // TODO - do we really want a fixed folder name here?

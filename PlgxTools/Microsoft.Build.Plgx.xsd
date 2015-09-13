@@ -1,17 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
  xmlns:msb="http://schemas.microsoft.com/developer/msbuild/2003"
+ targetNamespace="http://schemas.microsoft.com/developer/msbuild/2003"
  elementFormDefault="qualified">
+  <xs:include schemaLocation="C:\Program Files (x86)\Microsoft Visual Studio 14.0\Xml\Schemas\1033\Microsoft.Build.xsd" />
+
+  <!-- Extend Microsoft.Build.xsd to include properties used by PlgxTool.targets -->
+  <!-- Also see: http://keepass.info/help/v2_dev/plg_index.html#plgx -->
+
   <xs:element name="PlgxConfiguration" substitutionGroup="msb:Property">
     <xs:annotation>
-      <xs:documentation>Options parameters used for creating KeePass Plugin. See http://keepass.info/help/v2_dev/plg_index.html#plgx</xs:documentation>
+      <xs:documentation>Optional parameters used for creating KeePass 2.x plugin .plgx file.</xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Prerequisites" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>Conditions that must be met in order for plgx to run.</xs:documentation>
+          </xs:annotation>
           <xs:complexType>
             <xs:sequence minOccurs="1" maxOccurs="1">
               <xs:element name="KeePassVersion" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>The minimum KeePass version required by this plgx.</xs:documentation>
+                </xs:annotation>
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:pattern value="2\.[\d\.]+" />
@@ -19,6 +31,9 @@
                 </xs:simpleType>
               </xs:element>
               <xs:element name="DotNetVersion" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>The minimum .NET version required by this plgx.</xs:documentation>
+                </xs:annotation>
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:pattern value="\d[\.\d]*" />
@@ -26,6 +41,9 @@
                 </xs:simpleType>
               </xs:element>
               <xs:element name="OS" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>The operating system required by this plgx.</xs:documentation>
+                </xs:annotation>
                 <xs:simpleType>
                   <xs:restriction base="xs:string">
                     <xs:enumeration value="Windows" />
@@ -36,6 +54,9 @@
               <xs:element name="PointerSize" minOccurs="0">
                 <xs:simpleType>
                   <xs:restriction base="xs:positiveInteger">
+                    <xs:annotation>
+                      <xs:documentation>The pointer size required by this plgx.</xs:documentation>
+                    </xs:annotation>
                     <xs:enumeration value="4" />
                     <xs:enumeration value="8" />
                   </xs:restriction>

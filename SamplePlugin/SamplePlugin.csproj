@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\PlgxTools\Plgx.targets" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -11,9 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SamplePlugin</RootNamespace>
     <AssemblyName>SamplePlugin</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ReleaseVersion>0.2.1</ReleaseVersion>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -60,38 +62,21 @@
     <CustomCommands>
       <CustomCommands>
         <Command type="AfterBuild" command="rm &quot;${TargetFile}&quot;" />
-        <Command type="AfterBuild" command="rsync --recursive --delete-excluded ${ProjectDir}/ /tmp/${ProjectName}/ --exclude=Databases/ --exclude=*.config --exclude=*.xml --exclude=bin --exclude=*.il" />
-        <Command type="AfterBuild" command="bin/ReleasePlgx/KeePass.exe --plgx-create /tmp/${ProjectName}" />
-        <Command type="AfterBuild" command="mv /tmp/${ProjectName}.plgx ${TargetDir}" />
-        <Command type="AfterBuild" command="rm -rf /tmp/${ProjectName}/" />
-        <Command type="Execute" command="bin/ReleasePlgx/KeePass.exe --pw:sample bin/ReleasePlgx/Databases/Sample.kdbx" />
       </CustomCommands>
     </CustomCommands>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
   </PropertyGroup>
+  <!-- You can add a property group just for the plgx stuff or you can add to existing property groups -->
   <PropertyGroup>
     <PlgxConfiguration>
-      <Prerequsites>
+      <Prerequisites>
         <KeePassVersion>2.19</KeePassVersion>
         <DotNetVersion>4.0</DotNetVersion>
-      </Prerequsites>
+      </Prerequisites>
     </PlgxConfiguration>
-    <PlgxExtras>
-      <Item Source="..\fake\lib\PreBuild.exe" Destination="bin\Prebuild.exe" />
-    </PlgxExtras>
   </PropertyGroup>
-  <Choose>
-    <When Condition="'$(KeePassPath)' == ''">
-      <PropertyGroup Condition="'$(ProgramFiles(x86))' != ''">
-        <KeePassPath>$(ProgramFiles(x86))\KeePass Password Safe 2\</KeePassPath>
-      </PropertyGroup>
-      <PropertyGroup Condition="'$(ProgramFiles)' != ''">
-        <KeePassPath>$(ProgramFiles)\KeePass Password Safe 2\</KeePassPath>
-      </PropertyGroup>
-    </When>
-  </Choose>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Windows.Forms" />
@@ -99,12 +84,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="KeePass.exe">
       <HintPath>$(KeePassPath)KeePass.exe</HintPath>
-    </Reference>
-    <Reference Include="DoNothing">
-      <HintPath>DoNothing.dll</HintPath>
-    </Reference>
-    <Reference Include="DoNothing2">
-      <HintPath>..\fake\lib\DoNothing2.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -114,35 +93,41 @@
   <ItemGroup>
     <None Include="KeePass.exe.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromPlgx />
     </None>
     <None Include="Databases\Sample.kdbx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromPlgx />
     </None>
     <None Include="KeePass.config.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <ExcludeFromPlgx />
+    </None>
+    <None Include="packages.config">
+      <ExcludeFromPlgx />
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KeePass2.x\KeePass\KeePass.csproj">
+      <Project>{10938016-dee2-4a25-9a5a-8fd3444379ca}</Project>
+      <Name>KeePass</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent Condition=" '$(OS)' == 'Windows_NT' ">:: Delete the main .dll so that KeePass installs from the .plgx instead of the .dll
-del "$(TargetPath)"
-
-:: create and install the .plgx
-robocopy /s /mir "$(ProjectDir)." "%25TEMP%25\$(ProjectName)" /xf *.config *.xml /xd bin obj Databases
-"$(TargetDir)KeePass.exe" --plgx-create "%25TEMP%25\$(ProjectName)"
-move "%25TEMP%25\$(TargetName).plgx" "$(TargetPath)$(TargetName).plgx"
-rmdir /s /q "%25TEMP%25\$(ProjectName)"</PostBuildEvent>
-  </PropertyGroup>
   <Target Name="AfterClean">
     <Delete Files="$(OutputPath)KeePass.exe" />
     <RemoveDir Directories="$(OutputPath)Databases" Condition="Exists('$(OutputPath)Databases')" />
   </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+  <Target Name="AfterBuild" Condition="'$(Configuration)' == 'ReleasePlgx'">
+    <CallTarget Targets="BuildPlgx" />
+    <Delete Files="$(TargetPath)" />
   </Target>
-  <Target Name="AfterBuild">
+  <Import Project="..\packages\PlgxTool.0.1.4\build\PlgxTool.targets" Condition="Exists('..\packages\PlgxTool.0.1.4\build\PlgxTool.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\PlgxTool.0.1.4\build\PlgxTool.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\PlgxTool.0.1.4\build\PlgxTool.targets'))" />
   </Target>
-  -->
 </Project>

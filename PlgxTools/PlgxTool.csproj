@@ -45,11 +45,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="KeePassLib, Version=2.30.0.15901, Culture=neutral, PublicKeyToken=a47af649847d8ce7, processorArchitecture=MSIL">
+      <HintPath>..\packages\KeePassLib.2.30\lib\KeePassLib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
-    <Reference Include="KeePassLib">
-      <HintPath>..\lib\KeePass\KeePassLib.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ProjectExtensions>
     <MonoDevelop>
@@ -63,8 +64,13 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="packages.config" />
     <None Include="Plgx.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="PlgxTool.nuspec">
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
@@ -74,10 +80,10 @@
       <Output TaskParameter="Path" PropertyName="SdkPath" />
     </GetFrameworkSdkPath>
     <CreateProperty Condition="'$(OS)' == 'Windows_NT'" Value="$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe">
-        <Output TaskParameter="Value" PropertyName="XsdExe" />
+      <Output TaskParameter="Value" PropertyName="XsdExe" />
     </CreateProperty>
     <CreateProperty Condition="'$(OS)' != 'Windows_NT'" Value="xsd">
-        <Output TaskParameter="Value" PropertyName="XsdExe" />
+      <Output TaskParameter="Value" PropertyName="XsdExe" />
     </CreateProperty>
   </Target>
   <Target Name="BeforeBuild">

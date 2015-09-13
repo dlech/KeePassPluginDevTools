@@ -1,11 +1,6 @@
-This is a tool for developers of plugins for KeePass 2.x. It provides a number
-of useful tools.
+These are some tools for developers of plugins for KeePass 2.x.
 
-* Packager
+* PlgxTool
     * Automates creation of .plgx file using xml configuration file
-    * Creates .zip file that contains .plgx and supporting files such as docs
-    * Creates .msi installer for Windows (future)
-    * Creates .deb and .rpm packages for Linux (future)
-    
-* KeePass Runner
-    * Allows KeePass to be started, stopped and controlled programatically
+    * Integrates with MSBuild
+    * Can be used to list the contents of a .plgx file

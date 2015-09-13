@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<Project
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
-  
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="BuildPlgx">
     <WriteLinesToFile File="$(IntermediateOutputPath)PlgxConfig.xml"
      Lines="&lt;PlgxConfiguration&gt;$(PlgxConfiguration)&lt;/PlgxConfiguration&gt;"
@@ -10,7 +7,7 @@
     <CreateProperty Value="mono" Condition="'$(MonoExec)' == '' And '$(OS)' != 'Windows_NT'">
       <Output TaskParameter="Value" PropertyName="MonoExec" />
     </CreateProperty>
-    <Exec Command="$(MonoExec) &quot;$(KeePassPluginDevToolsPath)PlgxTool.exe&quot; --build --verbose --input=&quot;$(MSBuildProjectDirectory)&quot; --output=&quot;$(OutputPath).&quot; --config=&quot;$(IntermediateOutputPath)PlgxConfig.xml&quot;"
+    <Exec Command="$(MonoExec) &quot;$(MSBuildThisFileDirectory)..\tools\PlgxTool.exe&quot; --build --verbose --input=&quot;$(MSBuildProjectDirectory)&quot; --output=&quot;$(OutputPath).&quot; --config=&quot;$(IntermediateOutputPath)PlgxConfig.xml&quot;"
       Outputs="$(OutputPath)$(AssemblyName).plgx">
       <Output TaskParameter="Outputs" ItemName="FileWrites" />
     </Exec>

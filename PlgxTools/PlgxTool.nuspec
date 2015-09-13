@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>PlgxTool</id>
+    <version>0.1.4</version>
+    <authors>David Lechner</authors>
+    <owners>dlech</owners>
+    <licenseUrl>https://github.com/dlech/KeePassPluginDevTools/blob/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/dlech/KeePassPluginDevTools</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Tool for creating .plgx files for KeePass 2.x plugins</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright 2012-2015 David Lechner</copyright>
+    <tags>KeePass2.x plgx</tags>
+  </metadata>
+  <files>
+    <file src="..\build\bin\Release\PlgxTool.exe" target="tools\PlgxTool.exe" />
+    <file src="..\build\bin\Release\KeePassLib.dll" target="tools\KeePassLib.dll" />
+    <file src="Plgx.targets" target="build\PlgxTool.targets" />
+  </files>
+</package>

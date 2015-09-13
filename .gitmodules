@@ -1,3 +1,3 @@
-[submodule "keepass2"]
-	path = keepass2
-	url = git://github.com/dlech/keepass2.git
+[submodule "KeePass2.x"]
+	path = KeePass2.x
+	url = git://github.com/dlech/KeePass2.x

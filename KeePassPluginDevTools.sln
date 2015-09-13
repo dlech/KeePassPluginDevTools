@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30324.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KeePassControl", "KeePassControl\KeePassControl.csproj", "{7B11CC40-373F-4C20-99A5-DD70F3317D5C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamplePlugin", "SamplePlugin\SamplePlugin.csproj", "{4B5B8E16-3542-4997-8BF3-2DFFF5E9F1C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{F879E010-027D-420A-B94E-9243711BD574}"
@@ -29,25 +27,6 @@ Global
 		ReleasePlgx|x86 = ReleasePlgx|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Debug|x86.Build.0 = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Default|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Default|Any CPU.Build.0 = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Default|x64.ActiveCfg = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Default|x86.ActiveCfg = Debug|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Release|x64.ActiveCfg = Release|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Release|x86.ActiveCfg = Release|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.Release|x86.Build.0 = Release|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|Any CPU.ActiveCfg = ReleasePlgx|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|Any CPU.Build.0 = ReleasePlgx|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|x64.ActiveCfg = ReleasePlgx|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|x86.ActiveCfg = ReleasePlgx|Any CPU
-		{7B11CC40-373F-4C20-99A5-DD70F3317D5C}.ReleasePlgx|x86.Build.0 = ReleasePlgx|Any CPU
 		{4B5B8E16-3542-4997-8BF3-2DFFF5E9F1C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4B5B8E16-3542-4997-8BF3-2DFFF5E9F1C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B5B8E16-3542-4997-8BF3-2DFFF5E9F1C2}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -82,9 +82,6 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="KeePass.exe">
-      <HintPath>$(KeePassPath)KeePass.exe</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="SamplePluginExt.cs" />

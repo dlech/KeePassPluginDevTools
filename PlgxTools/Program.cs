@@ -219,7 +219,7 @@ namespace KeePassPluginDevTools.PlgxTools
               // loop if we need to
               var children = itemGroup.ChildNodes.Cast<XmlNode>().Where(child => child.NodeType != XmlNodeType.Comment).ToList();
 
-                foreach (XmlNode child in children) {
+              foreach (XmlNode child in children) {
                 if (child.LocalName == "Reference") {
                   foreach (XmlNode childMetadata in child.ChildNodes) {
                     var assemblyPath = Path.GetFullPath (

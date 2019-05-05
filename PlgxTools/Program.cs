@@ -11,12 +11,12 @@ using System.Reflection;
 using System.Collections.Generic;
 
 namespace KeePassPluginDevTools.PlgxTools
-{ 
+{
   public class Program
-  {    
+  {
     [Flags()]
     private enum Command
-    {      
+    {
       Help = 0, // default
       Build,
       List,
@@ -109,7 +109,7 @@ namespace KeePassPluginDevTools.PlgxTools
 
       switch (selectedCommand) {
         #region Build Command
-        case Command.Build:       
+        case Command.Build:
           try {
             // populate common information for all plgx
             var plgx = new PlgxInfo ();
@@ -118,7 +118,7 @@ namespace KeePassPluginDevTools.PlgxTools
             plgx.CreationTime = TimeUtil.SerializeUtc (DateTime.Now);
             var assm = Assembly.GetAssembly (typeof(Program)).GetName ();
             plgx.GeneratorName = assm.Name;
-            plgx.GeneratorVersion = 
+            plgx.GeneratorVersion =
             StrUtil.ParseVersion (assm.Version.ToString ());
 
             // read the optional config file to get the rest of the plgx header
@@ -141,15 +141,15 @@ namespace KeePassPluginDevTools.PlgxTools
                 serializer.UnknownAttribute += (sender, e) =>
                   Console.WriteLine ("Unknown attribute: {0} at {1}:{2}",
                                      e.Attr.Name, e.LineNumber, e.LinePosition);
-                serializer.UnknownElement += (sender, e) => 
+                serializer.UnknownElement += (sender, e) =>
                   Console.WriteLine ("Unknown element: {0} at {1}:{2}",
                                      e.Element.Name, e.LineNumber, e.LinePosition);
-                serializer.UnknownNode += (sender, e) => 
+                serializer.UnknownNode += (sender, e) =>
                   Console.WriteLine ("Unknown node: {0} at {1}:{2}",
                                      e.Name, e.LineNumber, e.LinePosition);
-                serializer.UnreferencedObject += (sender, e) => 
+                serializer.UnreferencedObject += (sender, e) =>
                   Console.WriteLine ("Unreferenced object: {0}",
-                                     e.UnreferencedId);                
+                                     e.UnreferencedId);
               }
               configDoc.Save (config);
               var plgxConfig =
@@ -176,7 +176,7 @@ namespace KeePassPluginDevTools.PlgxTools
                   plgx.BuildPost = plgxConfig.BuildCommands.PostBuild;
                 }
               }
-            }  
+            }
 
             // read the .csproj file to find which files we need to include in
             // the plgx
@@ -247,7 +247,7 @@ namespace KeePassPluginDevTools.PlgxTools
                 if (includeFile != null &&
                   !string.IsNullOrWhiteSpace (includeFile.Value))
                 {
-                  // skip "Include" files that are marked for exclusion from 
+                  // skip "Include" files that are marked for exclusion from
                   // the .plgx
                   var exclude = false;
                   foreach(XmlNode grandchild in child.ChildNodes)
@@ -297,7 +297,7 @@ namespace KeePassPluginDevTools.PlgxTools
             }
             // write the in-memory project xml document (.csproj) to the plgx
             // instead of the file on disk since we may have changed it
-            using (var stream = new MemoryStream()) { 
+            using (var stream = new MemoryStream()) {
               var writer = new XmlTextWriter (stream, Encoding.UTF8);
               writer.Formatting = Formatting.Indented;
               project.Save (writer);
@@ -335,7 +335,7 @@ namespace KeePassPluginDevTools.PlgxTools
           } catch (Exception ex) {
             Console.WriteLine (ex.Message);
             return 1;
-          }   
+          }
           break;
         #endregion
 
@@ -350,7 +350,7 @@ namespace KeePassPluginDevTools.PlgxTools
 
     private static string GetUsage ()
     {
-      string executable = 
+      string executable =
         Environment.OSVersion.Platform == PlatformID.Win32Windows ?
           "PlgxTool.exe" : "plgx-tool";
       const string line = "{0,-4}{1,-12}{2}\n";
@@ -373,7 +373,7 @@ namespace KeePassPluginDevTools.PlgxTools
       builder.AppendLine ();
 
       //    |                                --- ruler ---                                   |
-      //    |00000000011111111112222222222333333333344444444445555555555666666666677777777778|                  
+      //    |00000000011111111112222222222333333333344444444445555555555666666666677777777778|
       //    |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
       //    |x   x          x                                                                |
 

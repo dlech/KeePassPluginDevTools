@@ -100,7 +100,9 @@ namespace KeePassPluginDevTools.PlgxTools
       // build requires source and destination dir
         (selectedCommand == Command.Build && (input == null || output == null)) ||
       // list requires source dir
-        (selectedCommand == Command.List && input == null)) {
+        (selectedCommand == Command.List && input == null) ||
+      // extract requires source and destination dir
+        (selectedCommand == Command.Extract && (input == null || output == null))) {
         Console.WriteLine (GetUsage ());
         return 1;
       }
@@ -321,7 +323,25 @@ namespace KeePassPluginDevTools.PlgxTools
 
         #region Extract Command
         case Command.Extract:
-          Console.WriteLine ("Not implemented.");
+          try {
+            string outDir = UrlUtil.EnsureTerminatingSeparator (output, false)
+              + UrlUtil.StripExtension (UrlUtil.GetFileName (input))
+              + UrlUtil.LocalDirSepChar;
+            if (Directory.Exists (outDir)) {
+              Console.WriteLine ("Output directory \"" + outDir + "\" must not exist!");
+              return 1;
+            }
+
+            var plgx = PlgxInfo.ReadFile (File.OpenRead (input));
+            foreach (KeyValuePair<string, byte[]> file in plgx.Files) {
+              string outFile = outDir + file.Key;
+              Console.WriteLine (file.Key + " -> " + outFile);
+              PlgxInfo.ExtractFile(file.Value, outFile);
+            }
+          } catch (Exception ex) {
+            Console.WriteLine (ex.Message);
+            return 1;
+          }
           return 1;
         #endregion
 
@@ -367,6 +387,12 @@ namespace KeePassPluginDevTools.PlgxTools
       /* List syntax */
       builder.Append (executable);
       builder.Append (" --list [--in=]<source-file> ");
+      builder.AppendLine ();
+
+      /* List syntax */
+      builder.Append (executable);
+      builder.Append (" --extract [--in=]<source-file> ");
+      builder.Append ("[--out=]<destination-directory> ");
       builder.AppendLine ();
       builder.AppendLine ();
 

@@ -345,26 +345,20 @@ namespace KeePassPluginDevTools.PlgxTools
     }
 
     /// <summary>
-    /// Extracts the file contents to destDir.
+    /// Extracts the file contents to destFile.
     /// </summary>
     /// <param name="contents">Contents to extract (from Files property).</param>
-    /// <param name="destDir">Destination directory to store file.</param>
-    public static void ExtractFile(byte[] contents, string destDir)
+    /// <param name="destFile">Destination file to store contents.</param>
+    public static void ExtractFile(byte[] contents, string destFile)
     {
-
-      string path = null;
-
-      string tempFile =
-        UrlUtil.EnsureTerminatingSeparator (destDir, false) +
-          UrlUtil.ConvertSeparators (path);
+      string tempFile = UrlUtil.ConvertSeparators (destFile);
 
       string tempDir = UrlUtil.GetFileDirectory (tempFile, false, true);
       if (!Directory.Exists (tempDir)) {
         Directory.CreateDirectory (tempDir);
       }
 
-      byte[] decompressedData = MemUtil.Decompress (contents);
-      File.WriteAllBytes (tempFile, decompressedData);
+      File.WriteAllBytes (tempFile, contents);
     }
 
     public override string ToString ()

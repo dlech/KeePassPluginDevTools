@@ -45,15 +45,15 @@ namespace KeePassPluginDevTools.PlgxTools
       var options = new OptionSet ()
       {
         { "b|build", "create plgx file",
-          v => { if (v != null) selectedCommand |= Command.Build; } },
+          v => { if (v != null) selectedCommand = Command.Build; } },
         { "l|list", "list contents of plgx file",
-          v => { if (v != null) selectedCommand |= Command.List; } },
+          v => { if (v != null) selectedCommand = Command.List; } },
         { "e|extract", "extract file(s) from plgx",
-          v => { if (v != null) selectedCommand |= Command.Extract; } },
+          v => { if (v != null) selectedCommand = Command.Extract; } },
         { "p|package", "package plgx for distribution",
-          v => { if (v != null) selectedCommand |= Command.Package; } },
+          v => { if (v != null) selectedCommand = Command.Package; } },
         { "h|help|?", "show usage",
-          v => { if (v != null) selectedCommand |= Command.Help; } },
+          v => { if (v != null) selectedCommand = Command.Help; } },
         { "i|in|input=", "input file or directory",
           v => { input = v; } },
         { "o|out|output=", "output file or directory",
@@ -97,12 +97,10 @@ namespace KeePassPluginDevTools.PlgxTools
       }
 
       if (selectedCommand == Command.Help ||
-      // build requires source dir
+      // build requires source and destination dir
         (selectedCommand == Command.Build && (input == null || output == null)) ||
-      // build requires source dir
-        (selectedCommand == Command.List && input == null) ||
-      // selected commands are mutually exclusive
-        Math.Log ((double)selectedCommand, 2) % 1 != 0) {
+      // list requires source dir
+        (selectedCommand == Command.List && input == null)) {
         Console.WriteLine (GetUsage ());
         return 1;
       }

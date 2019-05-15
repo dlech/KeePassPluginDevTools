@@ -130,7 +130,7 @@ namespace KeePassPluginDevTools.PlgxTools
               // strip them or else the serializer fails
               configDoc = XmlNamespaceStripper.StripNamespace (configDoc);
 
-              var serializer = new XmlSerializer (typeof(PlgxConfiguration));
+              var serializer = new XmlSerializer (typeof(PropertyGroupTypePropertyPlgxConfiguration));
               if (verbose) {
 #if DEBUG
                 var writer = new XmlTextWriter(Console.OpenStandardOutput(), Encoding.UTF8);
@@ -153,7 +153,7 @@ namespace KeePassPluginDevTools.PlgxTools
               }
               configDoc.Save (config);
               var plgxConfig =
-                serializer.Deserialize (File.OpenRead (config)) as PlgxConfiguration;
+                serializer.Deserialize (File.OpenRead (config)) as PropertyGroupTypePropertyPlgxConfiguration;
               if (plgxConfig.Prerequisites != null) {
                 if (!string.IsNullOrWhiteSpace (plgxConfig.Prerequisites.KeePassVersion)) {
                   plgx.PrereqKP = StrUtil.ParseVersion (plgxConfig.Prerequisites.KeePassVersion);

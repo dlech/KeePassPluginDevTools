@@ -12,12 +12,12 @@ namespace KeePassPluginDevTools.PlgxTools
       return test;
     }
 
-    public static string GetValue(this PlgxConfigurationPrerequisitesOS version)
+    public static string GetValue(this PropertyGroupTypePropertyPlgxConfigurationPrerequisitesOS version)
     {
       return GetXmlEnumAttribute (version) ?? version.ToString ();
     }
 
-    public static string GetValue(this PlgxConfigurationPrerequisitesPointerSize version)
+    public static string GetValue(this PropertyGroupTypePropertyPlgxConfigurationPrerequisitesPointerSize version)
     {
       return GetXmlEnumAttribute (version) ?? version.ToString ();
     }

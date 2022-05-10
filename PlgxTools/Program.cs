@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
@@ -30,12 +31,12 @@ namespace KeePassPluginDevTools.PlgxTools
 
     public static int Main (string[] args)
     {
-#if DEBUG
-      // set args here for debugging
-      args = new[] { "--build", @"..\..\..\SamplePlugin\",
-        "../../../SamplePlugin/bin/Debug/",
-        "-c=test.xml" };
-#endif
+// #if DEBUG
+//       // set args here for debugging
+//       args = new[] { "--build", @"..\..\..\SamplePlugin\",
+//         "../../../SamplePlugin/bin/Debug/",
+//         "-c=test.xml" };
+// #endif
       var selectedCommand = new Command ();
       string input = null;
       string output = null;
@@ -222,6 +223,11 @@ namespace KeePassPluginDevTools.PlgxTools
               }
               foreach (XmlNode child in children) {
                 if (child.LocalName == "Reference") {
+                  if (child.ChildNodes.Cast<XmlNode>().Any(n => n.LocalName == "ExcludeFromPlgx")) {
+                    itemGroup.RemoveChild(child);
+                    continue;
+                  }
+
                   foreach (XmlNode childMetadata in child.ChildNodes) {
                     var assemblyPath = Path.GetFullPath (
                     Path.Combine (input, UrlUtil.ConvertSeparators (childMetadata.InnerText)));
@@ -316,6 +322,7 @@ namespace KeePassPluginDevTools.PlgxTools
             plgx.WriteFile (output);
           } catch (Exception ex) {
             Console.WriteLine (ex.Message);
+            Console.WriteLine (ex.StackTrace);
             return 1;
           }
           break;

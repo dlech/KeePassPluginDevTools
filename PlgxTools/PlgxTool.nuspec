@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>PlgxTool</id>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <authors>David Lechner</authors>
     <owners>dlech</owners>
     <licenseUrl>https://github.com/dlech/KeePassPluginDevTools/blob/master/LICENSE.txt</licenseUrl>

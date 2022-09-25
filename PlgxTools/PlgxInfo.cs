@@ -19,12 +19,12 @@ namespace KeePassPluginDevTools.PlgxTools
     /// </summary>
     public const string PlgxExtension = "plgx";
     public const string none = "<none>";
-    
+
     private const uint PlgxSignature1 = 0x65D90719;
     private const uint PlgxSignature2 = 0x3DDD0503;
     public const uint PlgxVersion1 = 0x00010000;
     private const uint PlgxVersionMask = 0xFFFF0000;
-    
+
     private const ushort PlgxEOF = 0;
     private const ushort PlgxFileUuid = 1;
     private const ushort PlgxBaseFileName = 2;
@@ -40,7 +40,7 @@ namespace KeePassPluginDevTools.PlgxTools
     private const ushort PlgxPrereqPtr = 12; // Pointer size
     private const ushort PlgxBuildPre = 13;
     private const ushort PlgxBuildPost = 14;
-    
+
     private const ushort PlgxfEOF = 0;
     private const ushort PlgxfPath = 1;
     private const ushort PlgxfData = 2;
@@ -58,7 +58,7 @@ namespace KeePassPluginDevTools.PlgxTools
     /// <summary>
     /// Gets or sets the name of the base file.
     /// </summary>
-    public string BaseFileName { get; set; }   
+    public string BaseFileName { get; set; }
 
     /// <summary>
     /// Gets or sets the creation time.
@@ -73,7 +73,7 @@ namespace KeePassPluginDevTools.PlgxTools
     /// <summary>
     /// Gets or sets the generator version.
     /// </summary>
-    public ulong GeneratorVersion { get; set; } 
+    public ulong GeneratorVersion { get; set; }
 
     /// <summary>
     /// Gets or sets the prerequsite KeePass version required
@@ -125,11 +125,11 @@ namespace KeePassPluginDevTools.PlgxTools
         Path.Combine (destDir, BaseFileName + "." + PlgxExtension);
 
       //PlgxCsprojLoader.LoadDefault(destDir, plgx);
-      
+
       FileStream fs = new FileStream(plgxFileName, FileMode.Create,
                                      FileAccess.Write, FileShare.None);
       BinaryWriter writer = new BinaryWriter(fs);
-      
+
       writer.Write(PlgxSignature1);
       writer.Write(PlgxSignature2);
       writer.Write(Version);
@@ -142,7 +142,7 @@ namespace KeePassPluginDevTools.PlgxTools
         GeneratorName));
       WriteObject(writer, PlgxGeneratorVersion, MemUtil.UInt64ToBytes(
         GeneratorVersion));
-           
+
       if (PrereqKP.HasValue) {
         WriteObject (writer, PlgxPrereqKP, MemUtil.UInt64ToBytes (PrereqKP.Value));
       }
@@ -167,16 +167,16 @@ namespace KeePassPluginDevTools.PlgxTools
       if (!string.IsNullOrEmpty (BuildPost)) {
         WriteObject (writer, PlgxBuildPost, StrUtil.Utf8.GetBytes (BuildPost));
       }
-      
+
       WriteObject(writer, PlgxBeginContent, null);
-      
+
       foreach (var file in Files) {
         AddFile (writer, file);
       }
-      
+
       WriteObject(writer, PlgxEndContent, null);
       WriteObject(writer, PlgxEOF, null);
-      
+
       writer.Close();
       fs.Close();
     }
@@ -196,7 +196,7 @@ namespace KeePassPluginDevTools.PlgxTools
     private static void AddFile(BinaryWriter writer,
                                 KeyValuePair<string, byte[]> file)
     {
-      
+
       var stream = new MemoryStream();
       var streamWriter = new BinaryWriter(stream);
 
@@ -204,12 +204,12 @@ namespace KeePassPluginDevTools.PlgxTools
 
       if(file.Value.LongLength >= (long)(int.MaxValue / 2)) // Max 1 GB
         throw new OutOfMemoryException();
-      
+
       byte[] compressedData = MemUtil.Compress(file.Value);
       WriteObject(streamWriter, PlgxfData, compressedData);
-      
+
       WriteObject(streamWriter, PlgxfEOF, null);
-      
+
       WriteObject(writer, PlgxFile, stream.ToArray());
       streamWriter.Close();
       stream.Close();
@@ -228,22 +228,22 @@ namespace KeePassPluginDevTools.PlgxTools
     {
       var reader = new BinaryReader (stream);
       var plgx = new PlgxInfo ();
-      
+
       var signature1 = reader.ReadUInt32();
       var signature2 = reader.ReadUInt32();
       plgx.Version = reader.ReadUInt32();
-      
+
       if ((signature1 != PlgxSignature1) || (signature2 != PlgxSignature2))
         throw new PlgxException ("Invalid signature at start of file");
       if((plgx.Version & PlgxVersionMask) > (PlgxVersion1 & PlgxVersionMask))
         throw new PlgxException(KLRes.FileVersionUnsupported);
-      
+
       bool? content = null;
-      
+
       while(true)
       {
         var pair = ReadObject(reader);
-        
+
         if(pair.Key == PlgxEOF) break;
         else if(pair.Key == PlgxFileUuid)
           plgx.FileUuid = new PwUuid(pair.Value);
@@ -271,14 +271,14 @@ namespace KeePassPluginDevTools.PlgxTools
         {
           if(content.HasValue)
             throw new PlgxException(KLRes.FileCorrupted);
-          
+
           content = true;
         }
         else if(pair.Key == PlgxFile)
         {
           if(!content.HasValue || !content.Value)
             throw new PlgxException(KLRes.FileCorrupted);
-          
+
           var file = ExtractFile(pair.Value);
           if (file != null) {
             plgx.Files.Add(file.Value);
@@ -288,17 +288,17 @@ namespace KeePassPluginDevTools.PlgxTools
         {
           if(!content.HasValue || !content.Value)
             throw new PlgxException(KLRes.FileCorrupted);
-          
+
           content = false;
         }
-        else { 
+        else {
           // TODO - do we want to list extra data?
         }
       }
-      
+
       return plgx;
     }
-    
+
     private static KeyValuePair<ushort, byte[]> ReadObject(BinaryReader reader)
     {
       try
@@ -306,24 +306,24 @@ namespace KeePassPluginDevTools.PlgxTools
         ushort dataType = reader.ReadUInt16();
         uint length = reader.ReadUInt32();
         byte[] dataValue = ((length > 0) ? reader.ReadBytes((int)length) : null);
-        
+
         return new KeyValuePair<ushort, byte[]>(dataType, dataValue);
       }
       catch(Exception) { throw new PlgxException(KLRes.FileCorrupted); }
     }
-    
+
     private static KeyValuePair<string, byte[]>? ExtractFile(byte[] data)
     {
       var stream = new MemoryStream(data, false);
       var reader = new BinaryReader(stream);
-      
+
       string path = null;
       byte[] contents = null;
-      
+
       while(true)
       {
         var pair = ReadObject(reader);
-        
+
         if(pair.Key == PlgxfEOF) break;
         else if(pair.Key == PlgxfPath)
           path = StrUtil.Utf8.GetString(pair.Value);
@@ -331,39 +331,34 @@ namespace KeePassPluginDevTools.PlgxTools
           contents = pair.Value;
         else { Debug.Assert(false); }
       }
-      
+
       reader.Close();
       stream.Close();
-      
+
       if (!string.IsNullOrEmpty (path) && contents != null) {
         byte[] pbDecompressed = MemUtil.Decompress(contents);
         return new KeyValuePair<string, byte[]> (path, pbDecompressed);
       }
-      
+
       Debug.Assert (false);
       return null;
     }
 
     /// <summary>
-    /// Extracts the file contents to destDir.
+    /// Extracts the file contents to destFile.
     /// </summary>
     /// <param name="contents">Contents to extract (from Files property).</param>
-    /// <param name="destDir">Destination directory to store file.</param>
-    public static void ExtractFile(byte[] contents, string destDir) {
-      
-      string path = null;
-      
-      string tempFile =
-        UrlUtil.EnsureTerminatingSeparator (destDir, false) +
-          UrlUtil.ConvertSeparators (path);
-      
+    /// <param name="destFile">Destination file to store contents.</param>
+    public static void ExtractFile(byte[] contents, string destFile)
+    {
+      string tempFile = UrlUtil.ConvertSeparators (destFile);
+
       string tempDir = UrlUtil.GetFileDirectory (tempFile, false, true);
       if (!Directory.Exists (tempDir)) {
         Directory.CreateDirectory (tempDir);
       }
-      
-      byte[] decompressedData = MemUtil.Decompress (contents);
-      File.WriteAllBytes (tempFile, decompressedData);     
+
+      File.WriteAllBytes (tempFile, contents);
     }
 
     public override string ToString ()
@@ -390,7 +385,7 @@ namespace KeePassPluginDevTools.PlgxTools
                             PrereqKP.HasValue ?
                             StrUtil.VersionToString (PrereqKP.Value) : none);
       builder.AppendFormat ("Prerequsite .NET Version:     {0}\n",
-                            PrereqNet.HasValue ? 
+                            PrereqNet.HasValue ?
                             StrUtil.VersionToString (PrereqNet.Value) : none);
       builder.AppendFormat ("Prerequsite Operating System: {0}\n",
                             PrereqOS != null ? PrereqOS : none);
@@ -424,8 +419,7 @@ namespace KeePassPluginDevTools.PlgxTools
     {
       sourceFile = Path.GetFullPath (sourceFile);
       var data = File.ReadAllBytes (sourceFile);
-      Files.Add (destinationFile, data);      
+      Files.Add (destinationFile, data);
     }
   }
 }
-

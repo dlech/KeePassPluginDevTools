@@ -12,12 +12,12 @@ using System.Reflection;
 using System.Collections.Generic;
 
 namespace KeePassPluginDevTools.PlgxTools
-{ 
+{
   public class Program
-  {    
+  {
     [Flags()]
     private enum Command
-    {      
+    {
       Help = 0, // default
       Build,
       List,
@@ -46,15 +46,15 @@ namespace KeePassPluginDevTools.PlgxTools
       var options = new OptionSet ()
       {
         { "b|build", "create plgx file",
-          v => { if (v != null) selectedCommand |= Command.Build; } },
+          v => { if (v != null) selectedCommand = Command.Build; } },
         { "l|list", "list contents of plgx file",
-          v => { if (v != null) selectedCommand |= Command.List; } },
+          v => { if (v != null) selectedCommand = Command.List; } },
         { "e|extract", "extract file(s) from plgx",
-          v => { if (v != null) selectedCommand |= Command.Extract; } },
+          v => { if (v != null) selectedCommand = Command.Extract; } },
         { "p|package", "package plgx for distribution",
-          v => { if (v != null) selectedCommand |= Command.Package; } },
+          v => { if (v != null) selectedCommand = Command.Package; } },
         { "h|help|?", "show usage",
-          v => { if (v != null) selectedCommand |= Command.Help; } },
+          v => { if (v != null) selectedCommand = Command.Help; } },
         { "i|in|input=", "input file or directory",
           v => { input = v; } },
         { "o|out|output=", "output file or directory",
@@ -98,19 +98,19 @@ namespace KeePassPluginDevTools.PlgxTools
       }
 
       if (selectedCommand == Command.Help ||
-      // build requires source dir
+      // build requires source and destination dir
         (selectedCommand == Command.Build && (input == null || output == null)) ||
-      // build requires source dir
+      // list requires source dir
         (selectedCommand == Command.List && input == null) ||
-      // selected commands are mutually exclusive
-        Math.Log ((double)selectedCommand, 2) % 1 != 0) {
+      // extract requires source and destination dir
+        (selectedCommand == Command.Extract && (input == null || output == null))) {
         Console.WriteLine (GetUsage ());
         return 1;
       }
 
       switch (selectedCommand) {
         #region Build Command
-        case Command.Build:       
+        case Command.Build:
           try {
             // populate common information for all plgx
             var plgx = new PlgxInfo ();
@@ -119,7 +119,7 @@ namespace KeePassPluginDevTools.PlgxTools
             plgx.CreationTime = TimeUtil.SerializeUtc (DateTime.Now);
             var assm = Assembly.GetAssembly (typeof(Program)).GetName ();
             plgx.GeneratorName = assm.Name;
-            plgx.GeneratorVersion = 
+            plgx.GeneratorVersion =
             StrUtil.ParseVersion (assm.Version.ToString ());
 
             // read the optional config file to get the rest of the plgx header
@@ -131,7 +131,7 @@ namespace KeePassPluginDevTools.PlgxTools
               // strip them or else the serializer fails
               configDoc = XmlNamespaceStripper.StripNamespace (configDoc);
 
-              var serializer = new XmlSerializer (typeof(PlgxConfiguration));
+              var serializer = new XmlSerializer (typeof(PropertyGroupTypePropertyPlgxConfiguration));
               if (verbose) {
 #if DEBUG
                 var writer = new XmlTextWriter(Console.OpenStandardOutput(), Encoding.UTF8);
@@ -142,19 +142,19 @@ namespace KeePassPluginDevTools.PlgxTools
                 serializer.UnknownAttribute += (sender, e) =>
                   Console.WriteLine ("Unknown attribute: {0} at {1}:{2}",
                                      e.Attr.Name, e.LineNumber, e.LinePosition);
-                serializer.UnknownElement += (sender, e) => 
+                serializer.UnknownElement += (sender, e) =>
                   Console.WriteLine ("Unknown element: {0} at {1}:{2}",
                                      e.Element.Name, e.LineNumber, e.LinePosition);
-                serializer.UnknownNode += (sender, e) => 
+                serializer.UnknownNode += (sender, e) =>
                   Console.WriteLine ("Unknown node: {0} at {1}:{2}",
                                      e.Name, e.LineNumber, e.LinePosition);
-                serializer.UnreferencedObject += (sender, e) => 
+                serializer.UnreferencedObject += (sender, e) =>
                   Console.WriteLine ("Unreferenced object: {0}",
-                                     e.UnreferencedId);                
+                                     e.UnreferencedId);
               }
               configDoc.Save (config);
               var plgxConfig =
-                serializer.Deserialize (File.OpenRead (config)) as PlgxConfiguration;
+                serializer.Deserialize (File.OpenRead (config)) as PropertyGroupTypePropertyPlgxConfiguration;
               if (plgxConfig.Prerequisites != null) {
                 if (!string.IsNullOrWhiteSpace (plgxConfig.Prerequisites.KeePassVersion)) {
                   plgx.PrereqKP = StrUtil.ParseVersion (plgxConfig.Prerequisites.KeePassVersion);
@@ -177,7 +177,7 @@ namespace KeePassPluginDevTools.PlgxTools
                   plgx.BuildPost = plgxConfig.BuildCommands.PostBuild;
                 }
               }
-            }  
+            }
 
             // read the .csproj file to find which files we need to include in
             // the plgx
@@ -253,7 +253,7 @@ namespace KeePassPluginDevTools.PlgxTools
                 if (includeFile != null &&
                   !string.IsNullOrWhiteSpace (includeFile.Value))
                 {
-                  // skip "Include" files that are marked for exclusion from 
+                  // skip "Include" files that are marked for exclusion from
                   // the .plgx
                   var exclude = false;
                   foreach(XmlNode grandchild in child.ChildNodes)
@@ -303,7 +303,7 @@ namespace KeePassPluginDevTools.PlgxTools
             }
             // write the in-memory project xml document (.csproj) to the plgx
             // instead of the file on disk since we may have changed it
-            using (var stream = new MemoryStream()) { 
+            using (var stream = new MemoryStream()) {
               var writer = new XmlTextWriter (stream, Encoding.UTF8);
               writer.Formatting = Formatting.Indented;
               project.Save (writer);
@@ -330,7 +330,25 @@ namespace KeePassPluginDevTools.PlgxTools
 
         #region Extract Command
         case Command.Extract:
-          Console.WriteLine ("Not implemented.");
+          try {
+            string outDir = UrlUtil.EnsureTerminatingSeparator (output, false)
+              + UrlUtil.StripExtension (UrlUtil.GetFileName (input))
+              + UrlUtil.LocalDirSepChar;
+            if (Directory.Exists (outDir)) {
+              Console.WriteLine ("Output directory \"" + outDir + "\" must not exist!");
+              return 1;
+            }
+
+            var plgx = PlgxInfo.ReadFile (File.OpenRead (input));
+            foreach (KeyValuePair<string, byte[]> file in plgx.Files) {
+              string outFile = outDir + file.Key;
+              Console.WriteLine (file.Key + " -> " + outFile);
+              PlgxInfo.ExtractFile(file.Value, outFile);
+            }
+          } catch (Exception ex) {
+            Console.WriteLine (ex.Message);
+            return 1;
+          }
           return 1;
         #endregion
 
@@ -342,7 +360,7 @@ namespace KeePassPluginDevTools.PlgxTools
           } catch (Exception ex) {
             Console.WriteLine (ex.Message);
             return 1;
-          }   
+          }
           break;
         #endregion
 
@@ -357,7 +375,7 @@ namespace KeePassPluginDevTools.PlgxTools
 
     private static string GetUsage ()
     {
-      string executable = 
+      string executable =
         Environment.OSVersion.Platform == PlatformID.Win32Windows ?
           "PlgxTool.exe" : "plgx-tool";
       const string line = "{0,-4}{1,-12}{2}\n";
@@ -377,10 +395,16 @@ namespace KeePassPluginDevTools.PlgxTools
       builder.Append (executable);
       builder.Append (" --list [--in=]<source-file> ");
       builder.AppendLine ();
+
+      /* List syntax */
+      builder.Append (executable);
+      builder.Append (" --extract [--in=]<source-file> ");
+      builder.Append ("[--out=]<destination-directory> ");
+      builder.AppendLine ();
       builder.AppendLine ();
 
       //    |                                --- ruler ---                                   |
-      //    |00000000011111111112222222222333333333344444444445555555555666666666677777777778|                  
+      //    |00000000011111111112222222222333333333344444444445555555555666666666677777777778|
       //    |12345678901234567890123456789012345678901234567890123456789012345678901234567890|
       //    |x   x          x                                                                |
 

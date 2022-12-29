@@ -76,18 +76,16 @@
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="GetXsdExe">
     <!-- based on http://connect.microsoft.com/VisualStudio/feedback/details/583931/xsd-exe-should-be-accessible-from-ide-builds -->
-    <GetFrameworkSdkPath>
-      <Output TaskParameter="Path" PropertyName="SdkPath" />
-    </GetFrameworkSdkPath>
-    <CreateProperty Condition="'$(OS)' == 'Windows_NT'" Value="$(SdkPath)bin\NETFX 4.0 Tools\xsd.exe">
+    <Error Condition="'$(SDK40ToolsPath)'==''" Text="Missing SDK40ToolsPath property." />
+    <Error Condition="!Exists('$(SDK40ToolsPath)xsd.exe')" Text="xsd.exe cannot be found at SDK40ToolsPath: $(SDK40ToolsPath)xsd.exe." />
+    <CreateProperty Condition="'$(OS)' == 'Windows_NT'" Value="&quot;$(SDK40ToolsPath)xsd.exe&quot;">
       <Output TaskParameter="Value" PropertyName="XsdExe" />
     </CreateProperty>
     <CreateProperty Condition="'$(OS)' != 'Windows_NT'" Value="xsd">
       <Output TaskParameter="Value" PropertyName="XsdExe" />
     </CreateProperty>
   </Target>
-  <Target Name="BeforeBuild">
-    <CallTarget Targets="GetXsdExe" />
+  <Target Name="BeforeBuild" DependsOnTargets="GetXsdExe">
     <Exec Command="$(XsdExe) Microsoft.Build.Plgx.xsd /c /n:$(RootNamespace)" />
   </Target>
   <Target Name="AfterClean">

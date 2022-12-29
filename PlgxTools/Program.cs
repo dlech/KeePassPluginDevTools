@@ -10,6 +10,7 @@ using KeePassLib.Utility;
 using KeePassLib;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace KeePassPluginDevTools.PlgxTools
 { 
@@ -215,12 +216,10 @@ namespace KeePassPluginDevTools.PlgxTools
             // include all of the project files unless specifically excluded
             var itemGroups = project.GetElementsByTagName ("ItemGroup");
             foreach (XmlNode itemGroup in itemGroups) {
-              // make copy of nodes so that we can delete them inside of the for
+              // make copy of nodes except comments so that we can delete them inside of the for
               // loop if we need to
-              var children = new List<XmlNode> ();
-              foreach (XmlNode child in itemGroup.ChildNodes) {
-                children.Add (child);
-              }
+              var children = itemGroup.ChildNodes.Cast<XmlNode>().Where(child => child.NodeType != XmlNodeType.Comment).ToList();
+
               foreach (XmlNode child in children) {
                 if (child.LocalName == "Reference") {
                   if (child.ChildNodes.Cast<XmlNode>().Any(n => n.LocalName == "ExcludeFromPlgx")) {
